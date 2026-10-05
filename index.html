@@ -46,6 +46,7 @@
       <p class="hint" style="margin-bottom: 20px;">يرجى تسجيل الدخول بحساب جوجل المعتمد لفتح الكاميرا والمسح</p>
       <button class="btn" id="loginBtn">تسجيل الدخول باستخدام Google 🚀</button>
       <div class="hint" id="loginHint" style="color:#ef4444; margin-top:10px;"></div>
+      <a href="https://script.google.com/macros/s/AKfycbzKOPh9KLNy3l-BwAzsgIwp55qlxIEXakYVOu2ouXb67uxekNRgMsINplqFN2t5QnH-/exec" class="btn secondary" target="_top">🏠 الرئيسية</a>
     </div>
 
     <!-- 2. CAMERA SCANNER VIEW -->
@@ -54,6 +55,7 @@
       <h2>📷 مسح كارت المخدوم</h2>
       <div id="reader"></div>
       <div class="hint" id="hint">جاري تشغيل الكاميرا...</div>
+      <a href="https://script.google.com/macros/s/AKfycbzKOPh9KLNy3l-BwAzsgIwp55qlxIEXakYVOu2ouXb67uxekNRgMsINplqFN2t5QnH-/exec" class="btn secondary" target="_top">🏠 الرئيسية</a>
     </div>
 
     <!-- 3. LOADING VIEW -->
@@ -69,6 +71,7 @@
       <div class="name" id="rName"></div>
       <div class="status-tag" id="rMsg"></div>
       <button class="btn" id="againBtn">📷 مسح شخص آخر</button>
+      <a href="https://script.google.com/macros/s/AKfycbzKOPh9KLNy3l-BwAzsgIwp55qlxIEXakYVOu2ouXb67uxekNRgMsINplqFN2t5QnH-/exec" class="btn secondary" target="_top">🏠 الرئيسية</a>
     </div>
 
   </div>
@@ -168,24 +171,33 @@
     // 3. Send Scanned Data to Google Apps Script with Access Token
     function sendToBackend(id) {
       show("loading");
-
+    
+      // إرسال التوكن مع الـ ID داخل الـ Body بدون Custom Headers لتفادي حظر CORS
       fetch(GAS_API_URL, {
         method: "POST",
         headers: {
-          "Authorization": "Bearer " + accessToken,
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify({ id: id, token: accessToken })
+        body: JSON.stringify({ 
+          id: id, 
+          token: accessToken 
+        })
       })
-      .then(res => res.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("HTTP error " + response.status);
+        }
+        return response.json();
+      })
       .then(renderResult)
       .catch(err => {
+        console.error("Fetch Error Detail:", err);
         renderResult({ 
           kind: "error", 
           icon: "❌", 
           title: "حدث خطأ في الاتصال", 
           name: "", 
-          message: err.message 
+          message: "تأكد من رابط الـ Web App وأنه منشور كـ Exec: " + err.message 
         });
       });
     }
