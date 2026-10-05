@@ -172,32 +172,45 @@
     function sendToBackend(id) {
       show("loading");
     
-      // إرسال التوكن مع الـ ID داخل الـ Body بدون Custom Headers لتفادي حظر CORS
+      // Validate that user is signed in with Google
+      if (!accessToken) {
+        renderResult({
+          kind: "error",
+          icon: "🔐",
+          title: "تسجيل الدخول مطلوب",
+          name: "",
+          message: "يرجى تسجيل الدخول بحساب جوجل أولاً للمتابعة"
+        });
+        return;
+      }
+    
+      // Send request with OAuth access token inside JSON body (bypasses CORS preflight)
       fetch(GAS_API_URL, {
         method: "POST",
+        redirect: "follow",
         headers: {
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify({ 
-          id: id, 
-          token: accessToken 
+        body: JSON.stringify({
+          id: id,
+          token: accessToken
         })
       })
       .then(response => {
         if (!response.ok) {
-          throw new Error("HTTP error " + response.status);
+          throw new Error("HTTP " + response.status);
         }
         return response.json();
       })
       .then(renderResult)
       .catch(err => {
-        console.error("Fetch Error Detail:", err);
-        renderResult({ 
-          kind: "error", 
-          icon: "❌", 
-          title: "حدث خطأ في الاتصال", 
-          name: "", 
-          message: "تأكد من رابط الـ Web App وأنه منشور كـ Exec: " + err.message 
+        console.error("Fetch Error:", err);
+        renderResult({
+          kind: "error",
+          icon: "❌",
+          title: "حدث خطأ في الاتصال",
+          name: "",
+          message: "فشل التوصيل بـ Google Apps Script: " + err.message
         });
       });
     }
