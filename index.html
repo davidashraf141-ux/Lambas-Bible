@@ -49,25 +49,57 @@
   </div>
 
   <script>
+    // ============================================================
+    // CONFIGURATION - Replace with your actual credentials
+    // ============================================================
+    const CLIENT_ID = "759295584482-3qpocftq0uk3du9s3g77pi91apt323im.apps.googleusercontent.com";
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzKOPh9KLNy3l-BwAzsgIwp55qlxIEXakYVOu2ouXb67uxekNRgMsINplqFN2t5QnH-/exec";
+    // ============================================================
+
+    var tokenClient = null;
+    var accessToken = null;
     var html5QrCode = null;
     var busy = false;
     var COLORS = { success: "#16a34a", late: "#d97706", out: "#2563eb", warn: "#d97706", error: "#ef4444", closed: "#d97706" };
 
-    function extractId(text) {
-      text = (text || "").trim();
-      var m = text.match(/[?&]id=([^&#]+)/);
-      if (m) return decodeURIComponent(m[1]);
-      if (/^[0-9A-Za-z_-]+$/.test(text)) return text;
-      return "";
-    }
-
     function show(id) {
-      ["scanView", "loading", "result"].forEach(function(x) {
+      ["loginView", "scanView", "loading", "result"].forEach(function(x) {
         document.getElementById(x).style.display = (x === id) ? "block" : "none";
       });
     }
 
+    // 1. Initialize Google Identity Services OAuth Token Client
+    function initGoogleAuth() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: "https://www.googleapis.com/auth/userinfo.email",
+        callback: (tokenResponse) => {
+          if (tokenResponse.error !== undefined) {
+            document.getElementById("loginHint").innerText = "❌ فشل تسجيل الدخول: " + tokenResponse.error;
+            return;
+          }
+          accessToken = tokenResponse.access_token;
+          
+          // Get user details (optional display)
+          fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          })
+          .then(res => res.json())
+          .then(user => {
+            document.getElementById("userEmail").innerText = "👤 " + user.email;
+          }).catch(() => {});
+
+          startCamera();
+        },
+      });
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", function() {
+      if (!tokenClient) initGoogleAuth();
+      tokenClient.requestAccessToken();
+    });
+
+    // 2. Start Live Camera Scanning
     function startCamera() {
       show("scanView");
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
@@ -82,6 +114,14 @@
       }).catch(function(err) {
         document.getElementById("hint").innerText = "❌ تعذر الوصول للكاميرا: تأكد من إعطاء الإذن للمتصفح";
       });
+    }
+
+    function extractId(text) {
+      text = (text || "").trim();
+      var m = text.match(/[?&]id=([^&#]+)/);
+      if (m) return decodeURIComponent(m[1]);
+      if (/^[0-9A-Za-z_-]+$/.test(text)) return text;
+      return "";
     }
 
     function onScan(text) {
@@ -100,33 +140,27 @@
       }
     }
 
+    // 3. Send Scanned Data to Google Apps Script with Access Token
     function sendToBackend(id) {
       show("loading");
-    
+
       fetch(GAS_API_URL, {
         method: "POST",
-        mode: "cors",
-        redirect: "follow",
         headers: {
+          "Authorization": "Bearer " + accessToken,
           "Content-Type": "text/plain;charset=utf-8"
         },
-        body: JSON.stringify({ id: id })
+        body: JSON.stringify({ id: id, token: accessToken })
       })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Server status: " + response.status);
-        }
-        return response.json();
-      })
+      .then(res => res.json())
       .then(renderResult)
       .catch(err => {
-        console.error("Fetch Error Detail:", err);
-        renderResult({
-          kind: "error",
-          icon: "❌",
-          title: "خطأ في الاتصال",
-          name: "",
-          message: "لم يتمكن الموقع من التوصيل بـ Apps Script: " + err.message
+        renderResult({ 
+          kind: "error", 
+          icon: "❌", 
+          title: "حدث خطأ في الاتصال", 
+          name: "", 
+          message: err.message 
         });
       });
     }
@@ -151,7 +185,15 @@
       startCamera();
     });
 
-    window.addEventListener("DOMContentLoaded", startCamera);
+    window.addEventListener("DOMContentLoaded", function() {
+      // Check for Google SDK readiness
+      var interval = setInterval(function() {
+        if (window.google && window.google.accounts) {
+          clearInterval(interval);
+          initGoogleAuth();
+        }
+      }, 100);
+    });
   </script>
 </body>
 </html>
