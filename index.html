@@ -3,328 +3,387 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>مسح QR المخدوم</title>
-  
+  <title>نظام الحضور والخدمة الذكي</title>
+  <!-- مكتبات خارجية مساعدة -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="الحضور">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3209/3209990.png">
-  
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js")
-          .then((reg) => console.log("PWA Service Worker registered:", reg.scope))
-          .catch((err) => console.error("SW Registration failed:", err));
-      });
-    }
-  </script>
-
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background: url("https://lh3.googleusercontent.com/d/1Th2BF-Xb5qQCUKYvr51aT1gx_ZVG52oY"); margin: 0; padding: 20px; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .container { max-width: 520px; width: 100%; background: #ffffff; padding: 25px 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; text-align: center; }
-    h2 { font-size: 20px; color: #1e293b; margin: 0 0 15px 0; }
-    #reader { width: 100%; border-radius: 16px; overflow: hidden; border: 2px solid #cbd5e1; background: #000; min-height: 250px; }
-    .hint { color: #64748b; font-size: 14px; margin-top: 12px; }
-    .btn { display: block; width: 100%; padding: 14px; margin-top: 12px; font-size: 16px; font-weight: 600; background: #2563eb; color: #fff; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; }
-    .btn-logout { background: #e2e8f0; color: #475569; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: none; cursor: pointer; float: left; }
+    body {
+      background: url('https://lh3.googleusercontent.com/d/1Th2BF-Xb5qQCUKYvr51aT1gx_ZVG52oY') no-repeat center center fixed;
+      background-size: cover; margin: 0; padding: 20px; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
+    }
+    .container {
+      max-width: 520px; width: 100%;
+      background: rgba(253, 251, 247, 0.94); backdrop-filter: blur(12px);
+      padding: 30px 22px; border-radius: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 2px solid #eab308;
+      position: relative;
+    }
+    h2 { font-size: 22px; color: #78350f; text-align: center; margin: 0 0 20px 0; font-weight: 700; }
     
-    #loginView, #scanView, #loading, #result { display: none; }
-    #loginView { display: block; }
+    /* Navigation Tiles */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .tile {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      min-height: 120px; background: rgba(255,255,255,0.9); border: 2px solid #f59e0b;
+      border-radius: 20px; text-decoration: none; color: #78350f; font-weight: 700; font-size: 16px;
+      text-align: center; cursor: pointer; transition: 0.15s;
+    }
+    .tile:active { transform: scale(0.96); background: #fef3c7; }
+    .tile .ico { font-size: 38px; }
+    .tile.wide { grid-column: span 2; }
+    .tile.primary { background: #b45309; color: #fff; border-color: #92400e; }
 
-    #loading { padding: 30px 10px; color: #1e293b; font-weight: 700; font-size: 18px; }
-    .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
+    /* UI Elements */
+    input[type="text"], input[type="password"], input[type="time"], input[type="number"] {
+      width: 100%; padding: 14px; font-size: 15px; border: 2px solid #d97706; border-radius: 14px;
+      outline: none; text-align: center; margin-bottom: 15px; font-weight: 600; background: #fff;
+    }
+    .btn {
+      display: block; width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; font-weight: 600;
+      background: #b45309; color: #fff; border: none; border-radius: 14px; cursor: pointer; text-align: center;
+      transition: 0.2s;
+    }
+    .btn:hover { background: #92400e; }
+    .btn.secondary { background: #64748b; }
+    
+    .camera-box { border: 2px dashed #d97706; border-radius: 16px; padding: 25px 15px; background: rgba(254, 243, 199, 0.5); margin-bottom: 15px; text-align: center; }
+    #fileInput { display: none; }
+    
+    /* Result Display */
+    .icon { font-size: 60px; margin-bottom: 10px; text-align: center; }
+    .title { font-size: 22px; color: #1e293b; font-weight: 700; margin-bottom: 15px; text-align: center; }
+    .name { font-size: 24px; color: #111827; font-weight: 700; margin-bottom: 15px; background: rgba(255,255,255,0.8); padding: 12px; border-radius: 14px; border: 1px dashed #d97706; text-align: center; }
+    .status-tag { font-size: 15px; padding: 10px 14px; border-radius: 10px; display: block; font-weight: 600; background: #fef3c7; color: #78350f; text-align: center; margin-bottom: 15px; }
+
+    /* Loader */
+    .loader { display: none; text-align: center; padding: 30px 10px; color: #78350f; font-weight: 700; font-size: 18px; }
+    .spinner { width: 45px; height: 45px; border: 4px solid #fde68a; border-top-color: #b45309; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .icon { font-size: 50px; margin-bottom: 10px; }
-    .title { font-size: 20px; color: #1e293b; font-weight: 700; margin-bottom: 10px; }
-    .name { font-size: 22px; color: #0f172a; font-weight: 700; margin-bottom: 15px; padding: 10px; background: #f1f5f9; border-radius: 10px; }
-    .status-tag { font-size: 14px; padding: 8px 12px; border-radius: 8px; display: inline-block; font-weight: 500; }
-    .user-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8fafc; padding: 8px 12px; border-radius: 10px; font-size: 13px; color: #334155; }
+    /* Floating Home Button */
+    .home-btn {
+      position: fixed; bottom: 18px; left: 18px; z-index: 999; background: #78350f; color: #fff;
+      padding: 12px 18px; border-radius: 30px; font-weight: 700; font-size: 15px; box-shadow: 0 6px 16px rgba(0,0,0,.35);
+      cursor: pointer; border: none; display: flex; align-items: center; gap: 6px;
+    }
+
+    .suggestion-btn {
+      display: flex; align-items: center; width: 100%; text-align: right; padding: 14px; margin: 8px 0;
+      background: rgba(255, 255, 255, 0.9); border: 1px solid #f59e0b; border-radius: 14px; cursor: pointer;
+      font-size: 16px; color: #1e293b; font-weight: 600;
+    }
+    
+    .days-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    .day-chip { position: relative; flex: 1 1 30%; }
+    .day-chip input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .day-chip label { display: block; padding: 10px 8px; text-align: center; font-weight: 600; font-size: 13px; color: #78350f; background: #fef3c7; border: 2px solid #fde68a; border-radius: 10px; cursor: pointer; }
+    .day-chip input:checked + label { background: #b45309; border-color: #92400e; color: #fff; }
   </style>
 </head>
 <body>
 
+  <button class="home-btn" onclick="showView('dashboardView')">🏠 الرئيسية</button>
+
   <div class="container">
-    
-    <!-- 1. LOGIN VIEW -->
-    <div id="loginView">
-      <h2>🔐 تسجيل الدخول لمسح الحضور</h2>
-      <p class="hint" style="margin-bottom: 20px;">قم بتسجيل الدخول مرة واحدة فقط بحسابك المعتمد</p>
-      <button class="btn" id="loginBtn">تسجيل الدخول بواسطة Google 🚀</button>
-      <div class="hint" id="loginHint" style="color:#ef4444; margin-top:10px;"></div>
-    </div>
+    <div id="hiddenScanner" style="display:none;"></div>
 
-    <!-- 2. SCANNER VIEW -->
-    <div id="scanView">
-      <div class="user-header">
-        <span id="userEmail"></span>
-        <button class="btn-logout" onclick="logout()">خروج</button>
+    <!-- 1. لوحة التحكم (Dashboard) -->
+    <div id="dashboardView">
+      <h2>🏠 لوحة التحكم</h2>
+      <div class="grid">
+        <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR</button>
+        <button class="tile" onclick="showView('searchView')"><span class="ico">🔍</span>تحضير بالاسم</button>
+        <button class="tile" onclick="showView('settingsView')"><span class="ico">⚙️</span>الإعدادات</button>
+        <button class="tile" onclick="openSheet()"><span class="ico">📊</span>فتح الشيت</button>
+        <button class="tile wide" onclick="showView('addView')"><span class="ico">➕</span>إضافة مخدوم جديد</button>
       </div>
+    </div>
+
+    <!-- 2. صفحة مسح الـ QR -->
+    <div id="scanView" style="display:none;">
       <h2>📷 مسح كارت المخدوم</h2>
-      <div id="reader"></div>
-      <div class="hint" id="hint">جاري طلب إذن الكاميرا...</div>
+      <div class="camera-box">
+        <div style="font-size: 50px; margin-bottom: 10px;">📸</div>
+        <label for="fileInput" class="btn">التقاط صورة للـ QR 📷</label>
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        <div style="color: #475569; font-size: 14px; margin-top: 10px;" id="scanHint">اضغط للفتح المباشر للكاميرا وقراءة الكود</div>
+      </div>
     </div>
 
-    <!-- 3. LOADING VIEW -->
-    <div id="loading">
+    <!-- 3. صفحة التحضير بالاسم -->
+    <div id="searchView" style="display:none;">
+      <h2>🔍 التحضير السريع بالاسم</h2>
+      <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا..." autocomplete="off">
+      <button class="btn" onclick="executeSearch()">بحث</button>
+      <div id="searchResults" style="margin-top:20px;"></div>
+    </div>
+
+    <!-- 4. صفحة إضافة مخدوم -->
+    <div id="addView" style="display:none;">
+      <h2>➕ إضافة مخدوم جديد</h2>
+      <input type="text" id="newStudentName" placeholder="اسم المخدوم ثلاثي..." autocomplete="off">
+      <button class="btn" onclick="submitNewStudent()">حفظ وتوليد الكارت 🎨</button>
+      <div id="addResult" style="margin-top:15px; text-align:center;"></div>
+    </div>
+
+    <!-- 5. صفحة الإعدادات -->
+    <div id="settingsView" style="display:none;">
+      <h2>🔒 إعدادات النظام</h2>
+      <div id="settingsLock">
+        <input type="password" id="gatePassword" placeholder="ادخل كلمة المرور">
+        <button class="btn" onclick="unlockSettings()">دخول</button>
+      </div>
+
+      <div id="settingsForm" style="display:none;">
+        <label style="font-weight:bold; color:#78350f;">موعد بدء الاجتماع</label>
+        <input type="time" id="cfgStartTime">
+        <label style="font-weight:bold; color:#78350f;">موعد نهاية الاجتماع</label>
+        <input type="time" id="cfgEndTime">
+        <label style="font-weight:bold; color:#78350f;">مدة السماح بالتأخير (دقائق)</label>
+        <input type="number" id="cfgAcceptedDelay">
+
+        <label style="font-weight:bold; color:#78350f;">الأيام المسموحة</label>
+        <div class="days-grid">
+          <div class="day-chip"><input type="checkbox" id="day0" value="0"><label for="day0">الأحد</label></div>
+          <div class="day-chip"><input type="checkbox" id="day1" value="1"><label for="day1">الاثنين</label></div>
+          <div class="day-chip"><input type="checkbox" id="day2" value="2"><label for="day2">الثلاثاء</label></div>
+          <div class="day-chip"><input type="checkbox" id="day3" value="3"><label for="day3">الأربعاء</label></div>
+          <div class="day-chip"><input type="checkbox" id="day4" value="4"><label for="day4">الخميس</label></div>
+          <div class="day-chip"><input type="checkbox" id="day5" value="5"><label for="day5">الجمعة</label></div>
+          <div class="day-chip"><input type="checkbox" id="day6" value="6"><label for="day6">السبت</label></div>
+        </div>
+
+        <label style="font-weight:bold; color:#78350f;">كلمة مرور جديدة (اختياري)</label>
+        <input type="password" id="cfgNewPassword" placeholder="اتركها فارغة للإبقاء على الحالية">
+
+        <button class="btn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+      </div>
+    </div>
+
+    <!-- شاشة التحميل العام -->
+    <div id="loader" class="loader">
       <div class="spinner"></div>
-      جاري التحقق وتسجيل الحضور...
+      <div id="loaderText">جاري معالجة الطلب...</div>
     </div>
 
-    <!-- 4. RESULT VIEW -->
-    <div id="result">
-      <div class="icon" id="rIcon"></div>
-      <div class="title" id="rTitle"></div>
-      <div class="name" id="rName"></div>
-      <div class="status-tag" id="rMsg"></div>
-      <button class="btn" id="againBtn">📷 مسح شخص آخر</button>
+    <!-- شاشة عرض النتيجة -->
+    <div id="resultView" style="display:none;">
+      <div class="icon" id="rIcon">✓</div>
+      <div class="title" id="rTitle">تم التسجيل</div>
+      <div class="name" id="rName">الاسم</div>
+      <div class="status-tag" id="rMsg">تفاصيل</div>
+      <button class="btn" onclick="showView('scanView')">📷 مسح آخر</button>
     </div>
 
   </div>
 
   <script>
-    const CLIENT_ID = "759295584482-3qpocftq0uk3du9s3g77pi91apt323im.apps.googleusercontent.com";
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzKOPh9KLNy3l-BwAzsgIwp55qlxIEXakYVOu2ouXb67uxekNRgMsINplqFN2t5QnH-/exec";
+    // ⚠️️ استبدل هذا الرابط برابط الـ Web App الخاص بك بعد النشر من Google Apps Script
+    const API_URL = "https://script.google.com/macros/s/AKfycbzlhSkjTupiYnO45wqVVf4UFTk1Ok0ggaWXEqdojszMOgLBSFTliCAeDtHpgxENAsPU/exec";
+    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets"; // ضع رابط الشيت هنا إن أحببت
 
-    var tokenClient = null;
-    var html5QrCode = null;
-    var busy = false;
+    var html5QrCode = new Html5Qrcode("hiddenScanner");
+    var verifiedPassword = "";
 
-    function show(id) {
-      ["loginView", "scanView", "loading", "result"].forEach(function(x) {
-        document.getElementById(x).style.display = (x === id) ? "block" : "none";
-      });
+    function openSheet() {
+      window.open(GOOGLE_SHEET_URL, "_blank");
     }
 
-    function initGoogleAuth() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: "https://www.googleapis.com/auth/userinfo.email",
-        callback: (tokenResponse) => {
-          if (tokenResponse.error !== undefined) {
-            document.getElementById("loginHint").innerText = "❌ فشل تسجيل الدخول: " + tokenResponse.error;
-            return;
-          }
-          
-          // Save token persistently
-          localStorage.setItem("user_access_token", tokenResponse.access_token);
-          fetchUserInfo(tokenResponse.access_token);
-        },
+    function showView(viewId) {
+      ["dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
+        document.getElementById(id).style.display = (id === viewId) ? "block" : "none";
       });
-    }
-
-    function fetchUserInfo(token) {
-  fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("Expired Token");
-    return res.json();
-  })
-  .then(user => {
-    const userEmail = (user.email || "").toLowerCase().trim();
-    
-    // Save details in local storage
-    localStorage.setItem("user_email", userEmail);
-    document.getElementById("userEmail").innerText = "👤 " + userEmail;
-
-    // --- INSTANT EMAIL CHECK AFTER LOGIN ---
-    verifyEmailWithBackend(userEmail);
-  })
-  .catch(() => {
-    logout();
-  });
-}
-
-function verifyEmailWithBackend(email) {
-    show("loading");
-  
-    // Ping backend with action: "check_auth"
-    fetch(GAS_API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ 
-        action: "check_auth", 
-        scannerEmail: email 
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.authorized) {
-        // Authorized! Proceed to camera
-        startCamera();
-      } else {
-        // Not authorized: Show error and stop
-        renderResult({
-          kind: "error",
-          icon: "🚫",
-          title: "حساب غير مصرح له",
-          name: email,
-          message: "هذا الحساب غير موجود في قائمة الخدام المصرح لهم بالمسح"
-        });
-      }
-    })
-    .catch(err => {
-      renderResult({
-        kind: "error",
-        icon: "❌",
-        title: "خطأ في التحقق",
-        name: "",
-        message: err.message
-      });
-    });
-  }
-
-    
-
-    // Auto-login check on page load
-    function checkSavedSession() {
-      var savedToken = localStorage.getItem("user_access_token");
-      var savedEmail = localStorage.getItem("user_email");
-
-      if (savedToken && savedEmail) {
-        document.getElementById("userEmail").innerText = "👤 " + savedEmail;
-        fetchUserInfo(savedToken); // Validates if token is still good
-      } else {
-        show("loginView");
+      if (viewId === "scanView") {
+        document.getElementById("fileInput").value = "";
+        document.getElementById("scanHint").innerText = "اضغط للفتح المباشر للكاميرا وقراءة الكود";
       }
     }
 
-    function logout() {
-      localStorage.removeItem("user_access_token");
-      localStorage.removeItem("user_email");
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => show("loginView"));
-      } else {
-        show("loginView");
-      }
-    }
-
-    document.getElementById("loginBtn").addEventListener("click", function() {
-      if (!tokenClient) initGoogleAuth();
-      tokenClient.requestAccessToken();
-    });
-
-    function startCamera() {
-      show("scanView");
-      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
-
-      Html5Qrcode.getCameras().then(function(devices) {
-        var selectedCamId = (devices && devices.length > 0) ? devices[0].id : null;
-        for (var i = 0; i < devices.length; i++) {
-          if (/back|rear|environment/i.test(devices[i].label)) {
-            selectedCamId = devices[i].id;
-            break;
-          }
-        }
-
-        var config = selectedCamId ? selectedCamId : { facingMode: "environment" };
-
-        html5QrCode.start(
-          config,
-          { fps: 10, qrbox: { width: 220, height: 220 } },
-          onScan,
-          function() {}
-        ).then(function() {
-          document.getElementById("hint").innerText = "وجّه الكاميرا نحو الـ QR";
-        }).catch(function(err) {
-          document.getElementById("hint").innerText = "❌ تعذر تشغيل الكاميرا: " + err;
-        });
-      }).catch(function() {
-        showFallbackCamera();
-      });
-    }
-
-    function showFallbackCamera() {
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 220, height: 220 } },
-        onScan,
-        function() {}
-      ).then(function() {
-        document.getElementById("hint").innerText = "وجّه الكاميرا نحو الـ QR";
-      }).catch(function(err) {
-        document.getElementById("hint").innerText = "❌ تعذر تشغيل الكاميرا";
-      });
-    }
-
-    function onScan(text) {
-      if (busy) return;
-      var id = (text || "").trim();
-      var m = id.match(/[?&]id=([^&#]+)/);
-      if (m) id = decodeURIComponent(m[1]);
-
-      if (!id) return;
-      busy = true;
-
-      if (html5QrCode && html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => sendToBackend(id)).catch(() => sendToBackend(id));
-      } else {
-        sendToBackend(id);
-      }
-    }
-
-    // 3. Send ID + Scanner Email to Backend
-    function sendToBackend(id) {
-      show("loading");
-
-      var scannerEmail = localStorage.getItem("user_email") || "";
-
-      fetch(GAS_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ 
-          id: id, 
-          scannerEmail: scannerEmail 
-        })
-      })
-      .then(res => res.json())
-      .then(renderResult)
-      .catch(err => {
-        renderResult({
-          kind: "error",
-          icon: "❌",
-          title: "خطأ في الاتصال",
-          name: "",
-          message: err.message
-        });
-      });
+    function showLoader(text) {
+      document.getElementById("loaderText").innerText = text || "جاري التحميل...";
+      showView("loader");
     }
 
     function renderResult(r) {
+      var COLORS = { success: "#16a34a", late: "#d97706", out: "#2563eb", warn: "#d97706", error: "#ef4444", closed: "#d97706" };
+      var color = COLORS[r.kind] || "#d97706";
       document.getElementById("rIcon").innerText = r.icon || "ℹ️";
+      document.getElementById("rIcon").style.color = color;
       document.getElementById("rTitle").innerText = r.title || "";
-      
       var nameEl = document.getElementById("rName");
       nameEl.innerText = r.name || "";
       nameEl.style.display = r.name ? "block" : "none";
-
       var msgEl = document.getElementById("rMsg");
       msgEl.innerText = r.message || "";
-      msgEl.style.display = r.message ? "inline-block" : "none";
-
-      show("result");
+      msgEl.style.display = r.message ? "block" : "none";
+      showView("resultView");
     }
 
-    document.getElementById("againBtn").addEventListener("click", function() {
-      busy = false;
-      startCamera();
+    // API Caller
+    async function apiCall(action, payload = {}) {
+      try {
+        payload.action = action;
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+        return await res.json();
+      } catch (e) {
+        return { success: false, kind: "error", icon: "❌", title: "خطأ بالاتصال", message: e.toString() };
+      }
+    }
+
+    // QR Scanning Logic
+    document.getElementById("fileInput").addEventListener("change", function(e) {
+      if (e.target.files.length === 0) return;
+      var imageFile = e.target.files[0];
+      showLoader("جاري قراءة رمز الـ QR...");
+
+      html5QrCode.scanFile(imageFile, true)
+        .then(function(qrCodeMessage) {
+          processScannedText(qrCodeMessage);
+        })
+        .catch(function(err) {
+          showView("scanView");
+          document.getElementById("scanHint").innerText = "❌ لم يتم العثور على رمز QR، يرجى إعادة المحاولة مع صورة أوضح";
+        });
     });
 
-    window.addEventListener("DOMContentLoaded", function() {
-      var interval = setInterval(function() {
-        if (window.google && window.google.accounts) {
-          clearInterval(interval);
-          initGoogleAuth();
-          checkSavedSession();
+    function extractId(text) {
+      text = (text || "").trim();
+      var m = text.match(/[?&]id=([^&#]+)/);
+      if (m) return decodeURIComponent(m[1]);
+      if (/^[0-9A-Za-z_-]+$/.test(text)) return text;
+      return "";
+    }
+
+    async function processScannedText(text) {
+      var id = extractId(text);
+      if (!id) {
+        renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تأكد من مسح كارت كود صحيح" });
+        return;
+      }
+      showLoader("جاري تسجيل الحضور...");
+      const res = await apiCall("scan", { id: id });
+      renderResult(res);
+    }
+
+    // Search Logic
+    async function executeSearch() {
+      var name = document.getElementById("searchNameInput").value.trim();
+      var resDiv = document.getElementById("searchResults");
+      if (!name) { resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>⚠️ يرجى إدخال اسم</p>"; return; }
+
+      resDiv.innerHTML = "<div style='text-align:center; padding:10px;'><div class='spinner' style='width:25px;height:25px;'></div>جاري البحث...</div>";
+      const res = await apiCall("search", { name: name });
+
+      resDiv.innerHTML = "";
+      if (res.status === "exact_match") {
+        processScannedText(res.id);
+      } else if (res.status === "suggestions") {
+        resDiv.innerHTML = "<div style='font-weight:bold; color:#b45309; margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
+        res.matches.forEach(function(item) {
+          var btn = document.createElement("button");
+          btn.className = "suggestion-btn";
+          btn.innerText = "👤 " + item.name;
+          btn.onclick = function() { processScannedText(item.id); };
+          resDiv.appendChild(btn);
+        });
+      } else {
+        resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>❌ لم نجد نتائج مطابقة</p>";
+      }
+    }
+
+    // Add Student Logic
+    async function submitNewStudent() {
+      var name = document.getElementById("newStudentName").value.trim();
+      if (!name) { alert("يرجى كتابة اسم المخدوم"); return; }
+
+      showLoader("جاري التسجيل وإنشاء الكارت...");
+      const res = await apiCall("add_student", { name: name });
+
+      if (res.success) {
+        var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
+        if (res.driveUrl) {
+          html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='background:#2563eb;'>📁 فتح الكارت في Google Drive</a>";
         }
-      }, 100);
+        document.getElementById("addResult").innerHTML = html;
+        document.getElementById("newStudentName").value = "";
+        showView("addView");
+      } else {
+        alert("فشل الإضافة: " + res.message);
+        showView("addView");
+      }
+    }
+
+    // Settings Logic
+    async function unlockSettings() {
+      var pw = document.getElementById("gatePassword").value;
+      if (!pw) return;
+      showLoader("جاري التحقق...");
+      const res = await apiCall("verify_settings_password", { password: pw });
+      if (res.valid) {
+        verifiedPassword = pw;
+        document.getElementById("settingsLock").style.display = "none";
+        document.getElementById("settingsForm").style.display = "block";
+        loadSettingsData();
+      } else {
+        alert("❌ كلمة المرور غير صحيحة");
+        showView("settingsView");
+      }
+    }
+
+    async function loadSettingsData() {
+      showLoader("جاري تحميل الإعدادات...");
+      const res = await apiCall("get_settings");
+      if (res.success) {
+        var s = res.settings;
+        document.getElementById("cfgStartTime").value = s.startTime;
+        document.getElementById("cfgEndTime").value = s.endTime;
+        document.getElementById("cfgAcceptedDelay").value = s.acceptedDelay;
+        var days = s.allowedDays || [0,1,2,3,4,5,6];
+        for (let d = 0; d <= 6; d++) {
+          document.getElementById("day" + d).checked = days.includes(d);
+        }
+        showView("settingsView");
+      }
+    }
+
+    async function saveSettings() {
+      var allowedDays = [];
+      for (let d = 0; d <= 6; d++) {
+        if (document.getElementById("day" + d).checked) allowedDays.push(d);
+      }
+      showLoader("جاري حفظ الإعدادات...");
+      const res = await apiCall("save_settings", {
+        password: verifiedPassword,
+        startTime: document.getElementById("cfgStartTime").value,
+        endTime: document.getElementById("cfgEndTime").value,
+        acceptedDelay: document.getElementById("cfgAcceptedDelay").value,
+        newPassword: document.getElementById("cfgNewPassword").value,
+        allowedDays: allowedDays
+      });
+      alert(res.message);
+      if (res.success) {
+        if (document.getElementById("cfgNewPassword").value) {
+          verifiedPassword = document.getElementById("cfgNewPassword").value;
+        }
+        document.getElementById("cfgNewPassword").value = "";
+      }
+      showView("settingsView");
+    }
+
+    // Auto Check Query String for direct QR URLs (e.g. ?id=12)
+    window.addEventListener("DOMContentLoaded", function() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var scannedId = urlParams.get("id");
+      if (scannedId) {
+        processScannedText(scannedId);
+      }
     });
   </script>
 </body>
