@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>نظام الحضور والخدمة الذكي</title>
-  <!-- مكتبات خارجية مساعدة -->
+  <!-- مكتبة ماسح الـ QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+  <!-- مكتبة Google OAuth 2.0 Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body {
@@ -23,6 +26,22 @@
     }
     h2 { font-size: 22px; color: #78350f; text-align: center; margin: 0 0 20px 0; font-weight: 700; }
     
+    /* User Profile Bar */
+    .user-profile-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fef3c7; border: 1px dashed #d97706; padding: 10px 14px;
+      border-radius: 16px; margin-bottom: 18px;
+    }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #b45309; }
+    .user-details { display: flex; flex-direction: column; font-size: 13px; color: #78350f; }
+    .user-name { font-weight: 700; }
+    .user-email { font-size: 11px; opacity: 0.85; word-break: break-all; }
+    .logout-btn {
+      background: #ef4444; color: #fff; border: none; padding: 6px 12px;
+      border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+
     /* Navigation Tiles */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .tile {
@@ -49,8 +68,16 @@
     .btn:hover { background: #92400e; }
     .btn.secondary { background: #64748b; }
     
-    .camera-box { border: 2px dashed #d97706; border-radius: 16px; padding: 25px 15px; background: rgba(254, 243, 199, 0.5); margin-bottom: 15px; text-align: center; }
-    #fileInput { display: none; }
+    /* Live Camera Container */
+    .camera-wrapper {
+      border: 2px solid #d97706; border-radius: 20px; overflow: hidden;
+      background: #000; position: relative; margin-bottom: 15px; min-height: 280px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    #qr-reader { width: 100%; }
+    .camera-status {
+      color: #78350f; font-size: 14px; text-align: center; font-weight: 600; margin-top: 8px;
+    }
     
     /* Result Display */
     .icon { font-size: 60px; margin-bottom: 10px; text-align: center; }
@@ -85,16 +112,44 @@
 </head>
 <body>
 
-  <button class="home-btn" onclick="showView('dashboardView')">🏠 الرئيسية</button>
+  <button id="homeBtn" class="home-btn" style="display:none;" onclick="showView('dashboardView')">🏠 الرئيسية</button>
 
   <div class="container">
-    <div id="hiddenScanner" style="display:none;"></div>
+
+    <!-- 0. شاشة تسجيل الدخول Google OAuth -->
+    <div id="loginView">
+      <h2>🔐 تسجيل الدخول للنظام</h2>
+      <p style="text-align: center; color: #78350f; font-weight: 600; margin-bottom: 20px;">
+        يرجى تسجيل الدخول بحساب Google المصرح له للبدء في استخدام النظام
+      </p>
+      <div id="g_id_onload"
+        data-client_id="759295584482-3qpocftq0uk3du9s3g77pi91apt323im.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+      </div>
+      <div style="display: flex; justify-content: center; margin-top: 15px;">
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+      </div>
+      <div id="loginError" style="color:#ef4444; font-weight:bold; text-align:center; margin-top:15px; display:none;"></div>
+    </div>
 
     <!-- 1. لوحة التحكم (Dashboard) -->
-    <div id="dashboardView">
+    <div id="dashboardView" style="display:none;">
+      <!-- شريط معلومات الخادم -->
+      <div class="user-profile-bar">
+        <div class="user-info">
+          <img id="uAvatar" class="user-avatar" src="" alt="User Avatar">
+          <div class="user-details">
+            <span id="uName" class="user-name">الاسم</span>
+            <span id="uEmail" class="user-email">email@gmail.com</span>
+          </div>
+        </div>
+        <button class="logout-btn" onclick="logoutUser()">خروج 🚪</button>
+      </div>
+
       <h2>🏠 لوحة التحكم</h2>
       <div class="grid">
-        <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR</button>
+        <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR مباشر</button>
         <button class="tile" onclick="showView('searchView')"><span class="ico">🔍</span>تحضير بالاسم</button>
         <button class="tile" onclick="showView('settingsView')"><span class="ico">⚙️</span>الإعدادات</button>
         <button class="tile" onclick="openSheet()"><span class="ico">📊</span>فتح الشيت</button>
@@ -102,15 +157,14 @@
       </div>
     </div>
 
-    <!-- 2. صفحة مسح الـ QR -->
+    <!-- 2. صفحة مسح الـ QR المباشرة عبر الكاميرا -->
     <div id="scanView" style="display:none;">
-      <h2>📷 مسح كارت المخدوم</h2>
-      <div class="camera-box">
-        <div style="font-size: 50px; margin-bottom: 10px;">📸</div>
-        <label for="fileInput" class="btn">التقاط صورة للـ QR 📷</label>
-        <input type="file" id="fileInput" accept="image/*" capture="environment">
-        <div style="color: #475569; font-size: 14px; margin-top: 10px;" id="scanHint">اضغط للفتح المباشر للكاميرا وقراءة الكود</div>
+      <h2>📷 المسح المباشر لكارت المخدوم</h2>
+      <div class="camera-wrapper">
+        <div id="qr-reader"></div>
       </div>
+      <div class="camera-status" id="cameraStatus">جاري تشغيل الكاميرا...</div>
+      <button class="btn secondary" style="margin-top:15px;" onclick="restartScanner()">🔄 إعادة تشغيل الكاميرا</button>
     </div>
 
     <!-- 3. صفحة التحضير بالاسم -->
@@ -181,24 +235,123 @@
   </div>
 
   <script>
-    // ⚠️️ استبدل هذا الرابط برابط الـ Web App الخاص بك بعد النشر من Google Apps Script
     const API_URL = "https://script.google.com/macros/s/AKfycbyPnUu7R0VaCrwyEYYW_YvyVI0q4g96OZLC9z5-MwTuL8Scw-0xa-_6-SfqCjgWw7KT/exec";
-    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1jqkN7v_0Uk3m3p_gfoXRdF4Q1c9XDXank1fnVmsm7jU/"; // ضع رابط الشيت هنا إن أحببت
+    const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1jqkN7v_0Uk3m3p_gfoXRdF4Q1c9XDXank1fnVmsm7jU/edit?usp=sharing";
 
-    var html5QrCode = new Html5Qrcode("hiddenScanner");
+    var currentUser = null;
+    var html5QrCode = null;
+    var isScannerRunning = false;
     var verifiedPassword = "";
+
+    // JWT Decoder Helper
+    function parseJwt(token) {
+      try {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) {
+        return null;
+      }
+    }
+
+    // Auth & Startup Flow
+    window.addEventListener("DOMContentLoaded", async function() {
+      const savedUser = localStorage.getItem("app_user");
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          showLoader("جاري التحقق من صلاحيات الحساب...");
+          const authRes = await apiCall("check_auth", { email: currentUser.email });
+          if (authRes.authorized) {
+            setupUserProfileUI();
+            checkDirectUrlScan();
+          } else {
+            logoutUser("❌ الحساب غير مصرح له بفتح النظام.");
+          }
+        } catch (e) {
+          logoutUser();
+        }
+      } else {
+        showView('loginView');
+      }
+    });
+
+    async function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (!payload || !payload.email) {
+        showLoginError("تعذر قراءة بيانات حساب Google");
+        return;
+      }
+
+      showLoader("جاري التحقق من صلاحية البريد الإلكتروني...");
+      const authRes = await apiCall("check_auth", { email: payload.email });
+
+      if (authRes.authorized) {
+        currentUser = {
+          email: payload.email.toLowerCase().trim(),
+          name: payload.name || payload.email,
+          picture: payload.picture || "https://lh3.googleusercontent.com/a/default-user"
+        };
+        localStorage.setItem("app_user", JSON.stringify(currentUser));
+        setupUserProfileUI();
+        checkDirectUrlScan();
+      } else {
+        showLoginError("❌ عذراً، البريد الإلكتروني (" + payload.email + ") غير مصرح له بالدخول.");
+      }
+    }
+
+    function setupUserProfileUI() {
+      if (!currentUser) return;
+      document.getElementById("uName").innerText = currentUser.name;
+      document.getElementById("uEmail").innerText = currentUser.email;
+      document.getElementById("uAvatar").src = currentUser.picture;
+      document.getElementById("homeBtn").style.display = "flex";
+      showView('dashboardView');
+    }
+
+    function logoutUser(msg) {
+      localStorage.removeItem("app_user");
+      currentUser = null;
+      stopLiveScanner();
+      document.getElementById("homeBtn").style.display = "none";
+      if (msg) showLoginError(msg);
+      showView('loginView');
+    }
+
+    function showLoginError(msg) {
+      var errDiv = document.getElementById("loginError");
+      errDiv.innerText = msg;
+      errDiv.style.display = "block";
+      showView('loginView');
+    }
+
+    function checkDirectUrlScan() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var scannedId = urlParams.get("id");
+      if (scannedId) {
+        processScannedText(scannedId);
+      }
+    }
 
     function openSheet() {
       window.open(GOOGLE_SHEET_URL, "_blank");
     }
 
+    // View Navigation Logic
     function showView(viewId) {
-      ["dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
+      if (viewId !== "scanView") {
+        stopLiveScanner();
+      }
+
+      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
         document.getElementById(id).style.display = (id === viewId) ? "block" : "none";
       });
+
       if (viewId === "scanView") {
-        document.getElementById("fileInput").value = "";
-        document.getElementById("scanHint").innerText = "اضغط للفتح المباشر للكاميرا وقراءة الكود";
+        startLiveScanner();
       }
     }
 
@@ -226,6 +379,9 @@
     async function apiCall(action, payload = {}) {
       try {
         payload.action = action;
+        if (currentUser && currentUser.email) {
+          payload.email = currentUser.email;
+        }
         const res = await fetch(API_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -237,21 +393,49 @@
       }
     }
 
-    // QR Scanning Logic
-    document.getElementById("fileInput").addEventListener("change", function(e) {
-      if (e.target.files.length === 0) return;
-      var imageFile = e.target.files[0];
-      showLoader("جاري قراءة رمز الـ QR...");
+    // Live Camera QR Scanning Logic
+    function startLiveScanner() {
+      if (isScannerRunning) return;
+      document.getElementById("cameraStatus").innerText = "🎥 جاري تشغيل الكاميرا المباشرة...";
+      
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("qr-reader");
+      }
 
-      html5QrCode.scanFile(imageFile, true)
-        .then(function(qrCodeMessage) {
-          processScannedText(qrCodeMessage);
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
+        .then(() => {
+          isScannerRunning = true;
+          document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن، ضع الـ QR أمام العدسة";
         })
-        .catch(function(err) {
-          showView("scanView");
-          document.getElementById("scanHint").innerText = "❌ لم يتم العثور على رمز QR، يرجى إعادة المحاولة مع صورة أوضح";
+        .catch((err) => {
+          isScannerRunning = false;
+          document.getElementById("cameraStatus").innerText = "❌ تعذر فتح الكاميرا: تأكد من منح صلاحية الوصول للكاميرا";
         });
-    });
+    }
+
+    function stopLiveScanner() {
+      if (html5QrCode && isScannerRunning) {
+        html5QrCode.stop().then(() => {
+          isScannerRunning = false;
+        }).catch(err => console.error(err));
+      }
+    }
+
+    function restartScanner() {
+      stopLiveScanner();
+      setTimeout(startLiveScanner, 300);
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      stopLiveScanner();
+      processScannedText(decodedText);
+    }
+
+    function onScanError(errorMessage) {
+      // Ignored for continuous scanning
+    }
 
     function extractId(text) {
       text = (text || "").trim();
@@ -268,7 +452,7 @@
         return;
       }
       showLoader("جاري تسجيل الحضور...");
-      const res = await apiCall("scan", { id: id });
+      const res = await apiCall("scan", { id: id, email: currentUser ? currentUser.email : "" });
       renderResult(res);
     }
 
@@ -304,7 +488,7 @@
       if (!name) { alert("يرجى كتابة اسم المخدوم"); return; }
 
       showLoader("جاري التسجيل وإنشاء الكارت...");
-      const res = await apiCall("add_student", { name: name });
+      const res = await apiCall("add_student", { name: name, email: currentUser ? currentUser.email : "" });
 
       if (res.success) {
         var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
@@ -376,15 +560,6 @@
       }
       showView("settingsView");
     }
-
-    // Auto Check Query String for direct QR URLs (e.g. ?id=12)
-    window.addEventListener("DOMContentLoaded", function() {
-      var urlParams = new URLSearchParams(window.location.search);
-      var scannedId = urlParams.get("id");
-      if (scannedId) {
-        processScannedText(scannedId);
-      }
-    });
   </script>
 </body>
 </html>
