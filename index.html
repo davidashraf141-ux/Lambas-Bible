@@ -8,6 +8,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <!-- مكتبة Google OAuth 2.0 Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -565,6 +568,15 @@
         document.getElementById("cfgNewPassword").value = "";
       }
       showView("settingsView");
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registered with scope:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
     }
   </script>
 </body>
