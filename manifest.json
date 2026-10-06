@@ -1,6 +1,6 @@
 {
-  "name": "نظام تسجيل الحضور",
-  "short_name": "الحضور",
+  "name": "Lambas Bible Qr",
+  "short_name": "LB Qr",
   "description": "تطبيق مسح QR لتسجيل حضور المخدومين",
   "start_url": "./index.html",
   "display": "standalone",
