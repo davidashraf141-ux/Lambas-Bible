@@ -810,6 +810,22 @@
       renderResult(res);
     }
 
+    async function processDirectAttendance(rawId) {
+      if (!rawId) {
+        renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تعذر الحصول على معرف المخدوم" });
+        return;
+      }
+      showLoader("جاري تسجيل الحضور...");
+      try {
+        const res = await apiCall("scan", { id: String(rawId).trim(), email: currentUser ? currentUser.email : "" });
+        hideLoader();
+        renderResult(res);
+      } catch (e) {
+        hideLoader();
+        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: e.toString() });
+      }
+    }
+
     async function executeSearch() {
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
@@ -819,22 +835,28 @@
       }
 
       resDiv.innerHTML = "<div style='text-align:center; padding:10px;'><div class='spinner' style='width:25px;height:25px;'></div>جاري البحث...</div>";
-      const res = await apiCall("search", { name: name });
+      
+      try {
+        const res = await apiCall("search", { name: name });
+        resDiv.innerHTML = "";
 
-      resDiv.innerHTML = "";
-      if (res.status === "exact_match") {
-        processScannedText(res.id);
-      } else if (res.status === "suggestions") {
-        resDiv.innerHTML = "<div style='font-weight:bold; color:var(--accent-gold); margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
-        res.matches.forEach(function(item) {
-          var btn = document.createElement("button");
-          btn.className = "suggestion-btn";
-          btn.innerText = "👤 " + item.name;
-          btn.onclick = function() { processScannedText(item.id); };
-          resDiv.appendChild(btn);
-        });
-      } else {
-        showToast("❌ لم نجد نتائج مطابقة", "error");
+        if (res && res.status === "exact_match") {
+          processDirectAttendance(res.id);
+        } else if (res && res.status === "suggestions" && Array.isArray(res.matches)) {
+          resDiv.innerHTML = "<div style='font-weight:bold; color:var(--accent-gold); margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
+          res.matches.forEach(function(item) {
+            var btn = document.createElement("button");
+            btn.className = "suggestion-btn";
+            btn.innerText = "👤 " + item.name;
+            btn.onclick = function() { processDirectAttendance(item.id); };
+            resDiv.appendChild(btn);
+          });
+        } else {
+          showToast("❌ لم نجد نتائج مطابقة", "error");
+        }
+      } catch (err) {
+        resDiv.innerHTML = "";
+        showToast("❌ حدث خطأ أثناء البحث", "error");
       }
     }
 
