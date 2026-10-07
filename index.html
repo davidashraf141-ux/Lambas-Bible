@@ -15,7 +15,7 @@
   
   <style>
     :root {
-      /* Dark Theme Default (Matching image: Rich Royal Navy & Glowing Gold) */
+      /* Dark Theme Default (Rich Royal Navy & Glowing Gold) */
       --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
       --app-bar-bg: #0d1b2a;
       --card-bg: rgba(22, 36, 56, 0.85);
@@ -53,6 +53,7 @@
       padding: 0;
     }
 
+    /* Body Flex Center Layout */
     body {
       background: var(--bg-gradient);
       background-attachment: fixed;
@@ -60,10 +61,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      justify-content: center; /* Vertically center content */
+      align-items: center;     /* Horizontally center content */
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
-      padding-top: 60px; /* Space for Top Bar */
+      padding-top: 60px; /* Offset for Top App Bar */
       padding-bottom: 20px;
     }
 
@@ -113,6 +115,7 @@
       transition: all 0.2s;
     }
 
+    /* Centered Main View Container */
     .container {
       max-width: 500px;
       width: 92%;
@@ -122,7 +125,7 @@
       border-radius: 24px;
       box-shadow: var(--shadow);
       border: 1.5px solid var(--card-border);
-      margin-top: 15px;
+      margin: auto 0; /* Auto vertical margin reinforces exact viewport centering */
       position: relative;
     }
 
