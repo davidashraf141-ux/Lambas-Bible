@@ -4,144 +4,382 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>نظام الحضور والخدمة الذكي</title>
-  <!-- مكتبة ماسح الـ QR -->
+  
+  <!-- QR Scanner Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-  <!-- مكتبة Google OAuth 2.0 Identity Services -->
+  <!-- Google OAuth 2.0 -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="manifest" href="manifest1.json">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#0d1b2a">
   <link rel="apple-touch-icon" href="new-icon-192.png">
   
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body {
-      background: url('https://lh3.googleusercontent.com/d/1Th2BF-Xb5qQCUKYvr51aT1gx_ZVG52oY') no-repeat center center fixed;
-      background-size: cover; margin: 0; padding: 20px; min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
+    :root {
+      /* Dark Theme Default (Matching image: Rich Royal Navy & Glowing Gold) */
+      --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
+      --app-bar-bg: #0d1b2a;
+      --card-bg: rgba(22, 36, 56, 0.85);
+      --card-border: #e0a96d;
+      --text-main: #f1f5f9;
+      --text-sub: #cbd5e1;
+      --accent-gold: #f4c430;
+      --accent-gold-hover: #d4a373;
+      --input-bg: rgba(13, 27, 42, 0.8);
+      --chip-bg: #1e293b;
+      --chip-border: #334155;
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     }
+
+    [data-theme="light"] {
+      /* Light Theme (Clean Ivory & Deep Navy accents) */
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --app-bar-bg: #1e293b;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: #d4a373;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --accent-gold: #b45309;
+      --accent-gold-hover: #92400e;
+      --input-bg: #ffffff;
+      --chip-bg: #f1f5f9;
+      --chip-border: #cbd5e1;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    * { 
+      box-sizing: border-box; 
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: 60px; /* Space for Top Bar */
+      padding-bottom: 20px;
+    }
+
+    /* Native App Top Bar */
+    .top-app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: var(--app-bar-bg);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(244, 196, 48, 0.2);
+    }
+
+    .top-app-bar .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--accent-gold);
+    }
+
+    .top-app-bar .brand img {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .theme-toggle-btn {
+      background: transparent;
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
     .container {
-      max-width: 520px; width: 100%;
-      background: rgba(253, 251, 247, 0.94); backdrop-filter: blur(12px);
-      padding: 30px 22px; border-radius: 28px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 2px solid #eab308;
+      max-width: 500px;
+      width: 92%;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--card-border);
+      margin-top: 15px;
       position: relative;
     }
-    h2 { font-size: 22px; color: #78350f; text-align: center; margin: 0 0 20px 0; font-weight: 700; }
-    
-    /* User Profile Bar */
+
+    h2 {
+      font-size: 20px;
+      color: var(--accent-gold);
+      text-align: center;
+      margin-bottom: 18px;
+      font-weight: 700;
+    }
+
+    /* Profile Bar */
     .user-profile-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #fef3c7; border: 1px dashed #d97706; padding: 10px 14px;
-      border-radius: 16px; margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--input-bg);
+      border: 1px dashed var(--accent-gold);
+      padding: 10px 14px;
+      border-radius: 16px;
+      margin-bottom: 18px;
     }
+
     .user-info { display: flex; align-items: center; gap: 10px; }
-    .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid #b45309; }
-    .user-details { display: flex; flex-direction: column; font-size: 13px; color: #78350f; }
+    .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent-gold); }
+    .user-details { display: flex; flex-direction: column; font-size: 13px; color: var(--text-main); }
     .user-name { font-weight: 700; }
-    .user-email { font-size: 11px; opacity: 0.85; word-break: break-all; }
-    .logout-btn {
-      background: #ef4444; color: #fff; border: none; padding: 6px 12px;
-      border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer;
-    }
-
-    /* Navigation Tiles */
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .tile {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-      min-height: 120px; background: rgba(255,255,255,0.9); border: 2px solid #f59e0b;
-      border-radius: 20px; text-decoration: none; color: #78350f; font-weight: 700; font-size: 16px;
-      text-align: center; cursor: pointer; transition: 0.15s;
-    }
-    .tile:active { transform: scale(0.96); background: #fef3c7; }
-    .tile .ico { font-size: 38px; }
-    .tile.wide { grid-column: span 2; }
-    .tile.primary { background: #b45309; color: #fff; border-color: #92400e; }
-
-    /* UI Elements */
-    input[type="text"], input[type="password"], input[type="time"], input[type="number"] {
-      width: 100%; padding: 14px; font-size: 15px; border: 2px solid #d97706; border-radius: 14px;
-      outline: none; text-align: center; margin-bottom: 15px; font-weight: 600; background: #fff;
-    }
-    .btn {
-      display: block; width: 100%; padding: 14px; margin-top: 10px; font-size: 16px; font-weight: 600;
-      background: #b45309; color: #fff; border: none; border-radius: 14px; cursor: pointer; text-align: center;
-      transition: 0.2s;
-    }
-    .btn:hover { background: #92400e; }
-    .btn.secondary { background: #64748b; }
+    .user-email { font-size: 11px; color: var(--text-sub); word-break: break-all; }
     
-    /* Live Camera Container */
+    .logout-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Navigation Grid */
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
+    .tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 110px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 18px;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.2s;
+    }
+
+    .tile:active { transform: scale(0.96); }
+    .tile .ico { font-size: 32px; }
+    .tile.primary {
+      background: linear-gradient(135deg, #d4a373 0%, #b45309 100%);
+      color: #ffffff;
+      border: none;
+    }
+
+    /* Form UI Elements */
+    input[type="text"], input[type="password"], input[type="time"], input[type="number"] {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      outline: none;
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+      background: var(--input-bg);
+      color: var(--text-main);
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f4c430 0%, #d4a373 100%);
+      color: #0d1b2a;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); }
+
+    /* Scanner Wrapper */
     .camera-wrapper {
-      border: 2px solid #d97706; border-radius: 20px; overflow: hidden;
-      background: #000; position: relative; margin-bottom: 15px; min-height: 280px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border: 2px solid var(--accent-gold);
+      border-radius: 18px;
+      overflow: hidden;
+      background: #000;
+      position: relative;
+      margin-bottom: 12px;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #qr-reader { width: 100%; }
+
     .camera-status {
-      color: #78350f; font-size: 14px; text-align: center; font-weight: 600; margin-top: 8px;
+      color: var(--text-sub);
+      font-size: 13px;
+      text-align: center;
+      font-weight: 600;
     }
-    
-    /* Result Display */
-    .icon { font-size: 60px; margin-bottom: 10px; text-align: center; }
-    .title { font-size: 22px; color: #1e293b; font-weight: 700; margin-bottom: 15px; text-align: center; }
-    .name { font-size: 24px; color: #111827; font-weight: 700; margin-bottom: 15px; background: rgba(255,255,255,0.8); padding: 12px; border-radius: 14px; border: 1px dashed #d97706; text-align: center; }
-    .status-tag { font-size: 15px; padding: 10px 14px; border-radius: 10px; display: block; font-weight: 600; background: #fef3c7; color: #78350f; text-align: center; margin-bottom: 15px; }
+
+    /* Result Card */
+    .icon { font-size: 50px; margin-bottom: 8px; text-align: center; }
+    .title { font-size: 20px; color: var(--text-main); font-weight: 700; margin-bottom: 12px; text-align: center; }
+    .name {
+      font-size: 22px;
+      color: var(--accent-gold);
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: var(--input-bg);
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px dashed var(--accent-gold);
+      text-align: center;
+    }
+    .status-tag {
+      font-size: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      display: block;
+      font-weight: 600;
+      background: var(--chip-bg);
+      color: var(--text-main);
+      text-align: center;
+      margin-bottom: 12px;
+    }
 
     /* Loader */
-    .loader { display: none; text-align: center; padding: 30px 10px; color: #78350f; font-weight: 700; font-size: 18px; }
-    .spinner { width: 45px; height: 45px; border: 4px solid #fde68a; border-top-color: #b45309; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
+    .loader { display: none; text-align: center; padding: 20px; color: var(--accent-gold); font-weight: 700; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid var(--chip-border);
+      border-top-color: var(--accent-gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Floating Home Button */
+    /* Home Button */
     .home-btn {
-      position: fixed; bottom: 18px; left: 18px; z-index: 999; background: #78350f; color: #fff;
-      padding: 12px 18px; border-radius: 30px; font-weight: 700; font-size: 15px; box-shadow: 0 6px 16px rgba(0,0,0,.35);
-      cursor: pointer; border: none; display: flex; align-items: center; gap: 6px;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 999;
+      background: var(--accent-gold);
+      color: #0d1b2a;
+      padding: 10px 18px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .suggestion-btn {
-      display: flex; align-items: center; width: 100%; text-align: right; padding: 14px; margin: 8px 0;
-      background: rgba(255, 255, 255, 0.9); border: 1px solid #f59e0b; border-radius: 14px; cursor: pointer;
-      font-size: 16px; color: #1e293b; font-weight: 600;
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--text-main);
+      font-weight: 600;
     }
-    
-    .days-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+
+    .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
-    .day-chip input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-    .day-chip label { display: block; padding: 10px 8px; text-align: center; font-weight: 600; font-size: 13px; color: #78350f; background: #fef3c7; border: 2px solid #fde68a; border-radius: 10px; cursor: pointer; }
-    .day-chip input:checked + label { background: #b45309; border-color: #92400e; color: #fff; }
+    .day-chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+    .day-chip label {
+      display: block;
+      padding: 8px 4px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: var(--text-main);
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .day-chip input:checked + label {
+      background: var(--accent-gold);
+      color: #0d1b2a;
+      border-color: var(--accent-gold);
+    }
   </style>
 </head>
-<body>
+<body data-theme="dark">
+
+  <!-- Native Top Bar -->
+  <header class="top-app-bar">
+    <div class="brand">
+      <img src="new-icon-512.png" alt="App Icon">
+      <span>Lambas Bible</span>
+    </div>
+    <button class="theme-toggle-btn" onclick="toggleTheme()">☀️ الوضع المضيء</button>
+  </header>
 
   <button id="homeBtn" class="home-btn" style="display:none;" onclick="showView('dashboardView')">🏠 الرئيسية</button>
 
   <div class="container">
 
-    <!-- 0. شاشة تسجيل الدخول Google OAuth -->
+    <!-- 0. Login View -->
     <div id="loginView">
       <h2>🔐 تسجيل الدخول للنظام</h2>
-      <p style="text-align: center; color: #78350f; font-weight: 600; margin-bottom: 20px;">
-        يرجى تسجيل الدخول بحساب Google المصرح له للبدء في استخدام النظام
+      <p style="text-align: center; color: var(--text-sub); font-size: 13px; font-weight: 600; margin-bottom: 18px;">
+        يرجى تسجيل الدخول بحساب Google المصرح له للبدء
       </p>
       <div id="g_id_onload"
         data-client_id="759295584482-3qpocftq0uk3du9s3g77pi91apt323im.apps.googleusercontent.com"
         data-callback="handleCredentialResponse"
         data-auto_prompt="false">
       </div>
-      <div style="display: flex; justify-content: center; margin-top: 15px;">
+      <div style="display: flex; justify-content: center; margin-top: 10px;">
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
       </div>
-      <div id="loginError" style="color:#ef4444; font-weight:bold; text-align:center; margin-top:15px; display:none;"></div>
+      <div id="loginError" style="color:#ef4444; font-weight:bold; text-align:center; margin-top:12px; display:none;"></div>
     </div>
 
-    <!-- 1. لوحة التحكم (Dashboard) -->
+    <!-- 1. Dashboard View -->
     <div id="dashboardView" style="display:none;">
-      <!-- شريط معلومات الخادم -->
       <div class="user-profile-bar">
         <div class="user-info">
-          <img id="uAvatar" class="user-avatar" src="" alt="User Avatar">
+          <img id="uAvatar" class="user-avatar" src="" alt="Avatar">
           <div class="user-details">
             <span id="uName" class="user-name">الاسم</span>
             <span id="uEmail" class="user-email">email@gmail.com</span>
@@ -154,40 +392,40 @@
       <div class="grid">
         <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR مباشر</button>
         <button class="tile" onclick="showView('searchView')"><span class="ico">🔍</span>تحضير بالاسم</button>
-        <button class="tile" onclick="openDrive()"><span class="ico">📊</span>فتح فولدر ال Qr</button>
+        <button class="tile" onclick="openDrive()"><span class="ico">📊</span>فتح فولدر ال QR</button>
         <button class="tile" onclick="openSheet()"><span class="ico">📊</span>فتح الشيت</button>
         <button class="tile" onclick="showView('addView')"><span class="ico">➕</span>إضافة مخدوم جديد</button>
         <button class="tile" onclick="showView('settingsView')"><span class="ico">⚙️</span>الإعدادات</button>
       </div>
     </div>
 
-    <!-- 2. صفحة مسح الـ QR المباشرة عبر الكاميرا -->
+    <!-- 2. Live QR Scan View -->
     <div id="scanView" style="display:none;">
       <h2>📷 المسح المباشر لكارت المخدوم</h2>
       <div class="camera-wrapper">
         <div id="qr-reader"></div>
       </div>
       <div class="camera-status" id="cameraStatus">جاري تشغيل الكاميرا...</div>
-      <button class="btn secondary" style="margin-top:15px;" onclick="restartScanner()">🔄 إعادة تشغيل الكاميرا</button>
+      <button class="btn secondary" style="margin-top:12px;" onclick="restartScanner()">🔄 إعادة تشغيل الكاميرا</button>
     </div>
 
-    <!-- 3. صفحة التحضير بالاسم -->
+    <!-- 3. Search View -->
     <div id="searchView" style="display:none;">
       <h2>🔍 التحضير السريع بالاسم</h2>
       <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا..." autocomplete="off">
       <button class="btn" onclick="executeSearch()">بحث</button>
-      <div id="searchResults" style="margin-top:20px;"></div>
+      <div id="searchResults" style="margin-top:15px;"></div>
     </div>
 
-    <!-- 4. صفحة إضافة مخدوم -->
+    <!-- 4. Add Student View -->
     <div id="addView" style="display:none;">
       <h2>➕ إضافة مخدوم جديد</h2>
       <input type="text" id="newStudentName" placeholder="اسم المخدوم ثلاثي..." autocomplete="off">
       <button class="btn" onclick="submitNewStudent()">حفظ وتوليد الكارت 🎨</button>
-      <div id="addResult" style="margin-top:15px; text-align:center;"></div>
+      <div id="addResult" style="margin-top:12px; text-align:center;"></div>
     </div>
 
-    <!-- 5. صفحة الإعدادات -->
+    <!-- 5. Settings View -->
     <div id="settingsView" style="display:none;">
       <h2>🔒 إعدادات النظام</h2>
       <div id="settingsLock">
@@ -196,14 +434,14 @@
       </div>
 
       <div id="settingsForm" style="display:none;">
-        <label style="font-weight:bold; color:#78350f;">موعد بدء الاجتماع</label>
+        <label style="font-weight:bold; font-size:12px;">موعد بدء الاجتماع</label>
         <input type="time" id="cfgStartTime">
-        <label style="font-weight:bold; color:#78350f;">موعد نهاية الاجتماع</label>
+        <label style="font-weight:bold; font-size:12px;">موعد نهاية الاجتماع</label>
         <input type="time" id="cfgEndTime">
-        <label style="font-weight:bold; color:#78350f;">مدة السماح بالتأخير (دقائق)</label>
+        <label style="font-weight:bold; font-size:12px;">مدة السماح بالتأخير (دقائق)</label>
         <input type="number" id="cfgAcceptedDelay">
 
-        <label style="font-weight:bold; color:#78350f;">الأيام المسموحة</label>
+        <label style="font-weight:bold; font-size:12px;">الأيام المسموحة</label>
         <div class="days-grid">
           <div class="day-chip"><input type="checkbox" id="day0" value="0"><label for="day0">الأحد</label></div>
           <div class="day-chip"><input type="checkbox" id="day1" value="1"><label for="day1">الاثنين</label></div>
@@ -214,20 +452,20 @@
           <div class="day-chip"><input type="checkbox" id="day6" value="6"><label for="day6">السبت</label></div>
         </div>
 
-        <label style="font-weight:bold; color:#78350f;">كلمة مرور جديدة (اختياري)</label>
+        <label style="font-weight:bold; font-size:12px;">كلمة مرور جديدة (اختياري)</label>
         <input type="password" id="cfgNewPassword" placeholder="اتركها فارغة للإبقاء على الحالية">
 
         <button class="btn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
       </div>
     </div>
 
-    <!-- شاشة التحميل العام -->
+    <!-- Global Loader -->
     <div id="loader" class="loader">
       <div class="spinner"></div>
       <div id="loaderText">جاري معالجة الطلب...</div>
     </div>
 
-    <!-- شاشة عرض النتيجة -->
+    <!-- Result View -->
     <div id="resultView" style="display:none;">
       <div class="icon" id="rIcon">✓</div>
       <div class="title" id="rTitle">تم التسجيل</div>
@@ -241,12 +479,14 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyPnUu7R0VaCrwyEYYW_YvyVI0q4g96OZLC9z5-MwTuL8Scw-0xa-_6-SfqCjgWw7KT/exec";
     const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1jqkN7v_0Uk3m3p_gfoXRdF4Q1c9XDXank1fnVmsm7jU/edit?usp=sharing";
-    const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1D5ElLa8-fNzShWqwgwcKQMC11XtfkE2z?usp=drive_link"
-    
+    const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1D5ElLa8-fNzShWqwgwcKQMC11XtfkE2z?usp=drive_link";
+
     var currentUser = null;
     var html5QrCode = null;
     var isScannerRunning = false;
     var verifiedPassword = "";
+    var currentActiveViewId = "loginView";
+    var localRosterCache = null;
 
     // JWT Decoder Helper
     function parseJwt(token) {
@@ -262,6 +502,68 @@
       }
     }
 
+    // Theme Switcher
+    function toggleTheme() {
+      const body = document.body;
+      const themeBtn = document.querySelector('.theme-toggle-btn');
+      if (body.getAttribute('data-theme') === 'dark') {
+        body.setAttribute('data-theme', 'light');
+        themeBtn.innerText = '🌙 الوضع الداكن';
+      } else {
+        body.setAttribute('data-theme', 'dark');
+        themeBtn.innerText = '☀️ الوضع المضيء';
+      }
+    }
+
+    // View State Reset Helper
+    function resetView(viewId) {
+      switch (viewId) {
+        case 'searchView':
+          var searchInput = document.getElementById('searchNameInput');
+          var searchResults = document.getElementById('searchResults');
+          if (searchInput) searchInput.value = '';
+          if (searchResults) searchResults.innerHTML = '';
+          break;
+        case 'scanView':
+          stopLiveScanner();
+          break;
+        case 'addView':
+          var nameInput = document.getElementById('newStudentName');
+          var addResult = document.getElementById('addResult');
+          if (nameInput) nameInput.value = '';
+          if (addResult) addResult.innerHTML = '';
+          break;
+        case 'settingsView':
+          var passInput = document.getElementById('gatePassword');
+          var settingsLock = document.getElementById('settingsLock');
+          var settingsForm = document.getElementById('settingsForm');
+          if (passInput) passInput.value = '';
+          if (settingsLock) settingsLock.style.display = 'block';
+          if (settingsForm) settingsForm.style.display = 'none';
+          verifiedPassword = "";
+          break;
+      }
+    }
+
+    // View Switcher Router
+    function showView(viewId) {
+      if (currentActiveViewId && currentActiveViewId !== viewId) {
+        resetView(currentActiveViewId);
+      }
+
+      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = (id === viewId) ? "block" : "none";
+      });
+
+      currentActiveViewId = viewId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (viewId === "scanView") {
+        startLiveScanner();
+      }
+    }
+
     // Auth & Startup Flow
     window.addEventListener("DOMContentLoaded", async function() {
       const savedUser = localStorage.getItem("app_user");
@@ -270,7 +572,7 @@
           currentUser = JSON.parse(savedUser);
           showLoader("جاري التحقق من صلاحيات الحساب...");
           const authRes = await apiCall("check_auth", { email: currentUser.email });
-          if (authRes.authorized) {
+          if (authRes && authRes.authorized) {
             setupUserProfileUI();
             checkDirectUrlScan();
           } else {
@@ -294,7 +596,7 @@
       showLoader("جاري التحقق من صلاحية البريد الإلكتروني...");
       const authRes = await apiCall("check_auth", { email: payload.email });
 
-      if (authRes.authorized) {
+      if (authRes && authRes.authorized) {
         currentUser = {
           email: payload.email.toLowerCase().trim(),
           name: payload.name || payload.email,
@@ -341,28 +643,8 @@
       }
     }
 
-    function openSheet() {
-      window.open(GOOGLE_SHEET_URL, "_blank");
-    }
-
-    function openDrive() {
-      window.open(DRIVE_FOLDER_URL, "_blank");
-    }
-
-    // View Navigation Logic
-    function showView(viewId) {
-      if (viewId !== "scanView") {
-        stopLiveScanner();
-      }
-
-      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
-        document.getElementById(id).style.display = (id === viewId) ? "block" : "none";
-      });
-
-      if (viewId === "scanView") {
-        startLiveScanner();
-      }
-    }
+    function openSheet() { window.open(GOOGLE_SHEET_URL, "_blank"); }
+    function openDrive() { window.open(DRIVE_FOLDER_URL, "_blank"); }
 
     function showLoader(text) {
       document.getElementById("loaderText").innerText = text || "جاري التحميل...";
@@ -393,7 +675,7 @@
         }
         const res = await fetch(API_URL, {
           method: "POST",
-          redirect: "follow", // <-- ADD THIS LINE
+          redirect: "follow",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
@@ -404,7 +686,7 @@
       }
     }
 
-    // Live Camera QR Scanning Logic
+    // Camera QR Scanner Logic
     function startLiveScanner() {
       if (isScannerRunning) return;
       document.getElementById("cameraStatus").innerText = "🎥 جاري تشغيل الكاميرا المباشرة...";
@@ -420,7 +702,7 @@
           isScannerRunning = true;
           document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن، ضع الـ QR أمام العدسة";
         })
-        .catch((err) => {
+        .catch(() => {
           isScannerRunning = false;
           document.getElementById("cameraStatus").innerText = "❌ تعذر فتح الكاميرا: تأكد من منح صلاحية الوصول للكاميرا";
         });
@@ -439,15 +721,14 @@
       setTimeout(startLiveScanner, 300);
     }
 
-    function onScanSuccess(decodedText, decodedResult) {
+    function onScanSuccess(decodedText) {
       stopLiveScanner();
       processScannedText(decodedText);
     }
 
-    function onScanError(errorMessage) {
-      // Ignored for continuous scanning
-    }
+    function onScanError(errorMessage) {}
 
+    // ID Extraction supporting plain ID, URL query ?id=X, and full WebApp URL
     function extractId(text) {
       text = (text || "").trim();
       var m = text.match(/[?&]id=([^&#]+)/);
@@ -467,11 +748,15 @@
       renderResult(res);
     }
 
-    // Search Logic
+    // Search Logic with Debounce
+    var searchDebounceTimer;
     async function executeSearch() {
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
-      if (!name) { resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>⚠️ يرجى إدخال اسم</p>"; return; }
+      if (!name) { 
+        resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>⚠️ يرجى إدخال اسم</p>"; 
+        return; 
+      }
 
       resDiv.innerHTML = "<div style='text-align:center; padding:10px;'><div class='spinner' style='width:25px;height:25px;'></div>جاري البحث...</div>";
       const res = await apiCall("search", { name: name });
@@ -480,7 +765,7 @@
       if (res.status === "exact_match") {
         processScannedText(res.id);
       } else if (res.status === "suggestions") {
-        resDiv.innerHTML = "<div style='font-weight:bold; color:#b45309; margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
+        resDiv.innerHTML = "<div style='font-weight:bold; color:var(--accent-gold); margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
         res.matches.forEach(function(item) {
           var btn = document.createElement("button");
           btn.className = "suggestion-btn";
@@ -493,7 +778,7 @@
       }
     }
 
-    // Add Student Logic
+    // Student Addition (Clean ID encoding)
     async function submitNewStudent() {
       var name = document.getElementById("newStudentName").value.trim();
       if (!name) { alert("يرجى كتابة اسم المخدوم"); return; }
@@ -504,7 +789,7 @@
       if (res.success) {
         var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
         if (res.driveUrl) {
-          html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='background:#2563eb;'>📁 فتح الكارت في Google Drive</a>";
+          html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='margin-top:10px;'>📁 فتح الكارت في Google Drive</a>";
         }
         document.getElementById("addResult").innerHTML = html;
         document.getElementById("newStudentName").value = "";
@@ -515,7 +800,7 @@
       }
     }
 
-    // Settings Logic
+    // Settings
     async function unlockSettings() {
       var pw = document.getElementById("gatePassword").value;
       if (!pw) return;
@@ -570,15 +855,6 @@
         document.getElementById("cfgNewPassword").value = "";
       }
       showView("settingsView");
-    }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then((reg) => console.log('Service Worker registered with scope:', reg.scope))
-          .catch((err) => console.error('Service Worker registration failed:', err));
-      });
     }
   </script>
 </body>
