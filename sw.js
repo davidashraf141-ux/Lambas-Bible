@@ -1,39 +1,69 @@
-const CACHE_NAME = "qr-attendance-v3";
+const CACHE_NAME = "attendance-app-v3";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./css/styles.css",
+  "./js/app.js",
   "./manifest.json",
-  "./new-icon-192.png",
-  "./new-icon-512.png",
-  "https://lh3.googleusercontent.com/d/1Th2BF-Xb5qQCUKYvr51aT1gx_ZVG52oY", // <--- Add your background image path here (or full image URL)
-  "https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js",
-  "https://accounts.google.com/gsi/client"
+  "./icons/icon-192.png",
+  "./icons/icon-512.png"
 ];
 
+// Install Event - Pre-cache core app shell assets
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
+// Activate Event - Clean up old cache versions
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
         })
-      )
-    )
+      );
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
+// Fetch Event - Route strategies
 self.addEventListener("fetch", (event) => {
-  if (event.request.url.includes("script.google.com")) return;
+  const requestUrl = new URL(event.request.url);
 
+  // 1. Never cache backend Apps Script API calls or external QR API queries
+  if (
+    requestUrl.hostname.includes("script.google.com") ||
+    requestUrl.hostname.includes("script.googleusercontent.com") ||
+    requestUrl.hostname.includes("api.qrserver.com") ||
+    event.request.method !== "GET"
+  ) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // 2. Cache-First strategy for static local assets with Network Fallback
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).then((networkResponse) => {
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== "basic") {
+          return networkResponse;
+        }
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+        return networkResponse;
+      });
+    })
   );
 });
