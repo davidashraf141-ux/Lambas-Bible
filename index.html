@@ -454,9 +454,9 @@
 
       <h2>🏠 لوحة التحكم</h2>
       <div class="grid">
-        <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR مباشر</button>
+        <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR</button>
         <button class="tile" onclick="showView('searchView')"><span class="ico">🔍</span>تحضير بالاسم</button>
-        <button class="tile" onclick="openDrive()"><span class="ico">📊</span>فتح فولدر ال QR</button>
+        <button class="tile" onclick="openDrive()"><span class="ico">📁</span>فولدر Google Drive</button>
         <button class="tile" onclick="openSheet()"><span class="ico">📊</span>فتح الشيت</button>
         <button class="tile" onclick="showView('addView')"><span class="ico">➕</span>إضافة مخدوم جديد</button>
         <button class="tile" onclick="showView('settingsView')"><span class="ico">⚙️</span>الإعدادات</button>
@@ -465,7 +465,7 @@
 
     <!-- 2. Live QR Scan View -->
     <div id="scanView" style="display:none;">
-      <h2>📷 المسح المباشر لكارت المخدوم</h2>
+      <h2>📷 مسح QR</h2>
       <div class="camera-wrapper">
         <div id="qr-reader"></div>
       </div>
