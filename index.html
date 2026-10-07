@@ -15,7 +15,7 @@
   
   <style>
     :root {
-      /* Dark Theme Default (Rich Royal Navy & Glowing Gold) */
+      /* Dark Theme Default */
       --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
       --app-bar-bg: #0d1b2a;
       --card-bg: rgba(22, 36, 56, 0.85);
@@ -31,7 +31,7 @@
     }
 
     [data-theme="light"] {
-      /* Light Theme (Clean Ivory & Deep Navy accents) */
+      /* Light Theme */
       --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
       --app-bar-bg: #1e293b;
       --card-bg: rgba(255, 255, 255, 0.95);
@@ -53,7 +53,6 @@
       padding: 0;
     }
 
-    /* Body Flex Center Layout */
     body {
       background: var(--bg-gradient);
       background-attachment: fixed;
@@ -69,12 +68,9 @@
       padding-bottom: 20px;
     }
 
-    /* Native App Top Bar */
     .top-app-bar {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       height: 60px;
       background: var(--app-bar-bg);
       color: #ffffff;
@@ -97,8 +93,7 @@
     }
 
     .top-app-bar .brand img {
-      width: 34px;
-      height: 34px;
+      width: 34px; height: 34px;
       border-radius: 8px;
       object-fit: cover;
     }
@@ -115,11 +110,9 @@
       transition: all 0.2s;
     }
 
-    /* Floating Toast Notification */
     .toast-container {
       position: fixed;
-      top: 70px;
-      left: 50%;
+      top: 70px; left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
       display: flex;
@@ -149,14 +142,10 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
 
-    /* Overlay Loader */
     .loader-overlay {
       display: none;
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(13, 27, 42, 0.85);
       backdrop-filter: blur(4px);
       z-index: 500;
@@ -168,7 +157,6 @@
       font-weight: 700;
     }
 
-    /* Centered Main View Container */
     .container {
       max-width: 500px;
       width: 92%;
@@ -190,7 +178,6 @@
       font-weight: 700;
     }
 
-    /* Profile Bar */
     .user-profile-bar {
       display: flex;
       align-items: center;
@@ -219,7 +206,6 @@
       cursor: pointer;
     }
 
-    /* Navigation Grid */
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     
     .tile {
@@ -248,7 +234,6 @@
       border: none;
     }
 
-    /* Form UI Elements */
     input[type="text"], input[type="password"], input[type="time"], input[type="number"] {
       width: 100%;
       padding: 12px 14px;
@@ -282,7 +267,6 @@
     .btn:hover { opacity: 0.9; }
     .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); }
 
-    /* Scanner Wrapper */
     .camera-wrapper {
       border: 2px solid var(--accent-gold);
       border-radius: 18px;
@@ -304,7 +288,6 @@
       font-weight: 600;
     }
 
-    /* Result Card */
     .icon { font-size: 50px; margin-bottom: 8px; text-align: center; }
     .title { font-size: 20px; color: var(--text-main); font-weight: 700; margin-bottom: 12px; text-align: center; }
     .name {
@@ -330,7 +313,6 @@
       margin-bottom: 12px;
     }
 
-    /* Spinner */
     .spinner {
       width: 40px; height: 40px;
       border: 4px solid var(--chip-border);
@@ -341,11 +323,9 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Home Button */
     .home-btn {
       position: fixed;
-      bottom: 20px;
-      left: 20px;
+      bottom: 20px; left: 20px;
       z-index: 999;
       background: var(--accent-gold);
       color: #0d1b2a;
@@ -400,10 +380,8 @@
 </head>
 <body data-theme="dark">
 
-  <!-- Floating Toast Notifications Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Native Top Bar -->
   <header class="top-app-bar">
     <div class="brand">
       <img src="new-icon-512.png" alt="App Icon">
@@ -416,7 +394,6 @@
 
   <div class="container">
 
-    <!-- Global Overlay Loader -->
     <div id="loader" class="loader-overlay">
       <div class="spinner"></div>
       <div id="loaderText">جاري معالجة الطلب...</div>
@@ -545,19 +522,15 @@
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
 
-    // Floating Notification Toast Function
     function showToast(message, type = "error") {
       const container = document.getElementById("toastContainer");
       const toast = document.createElement("div");
       toast.className = `toast ${type}`;
       toast.innerText = message;
       container.appendChild(toast);
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
+      setTimeout(() => { toast.remove(); }, 3000);
     }
 
-    // JWT Decoder Helper
     function parseJwt(token) {
       try {
         var base64Url = token.split('.')[1];
@@ -571,7 +544,6 @@
       }
     }
 
-    // Theme Switcher
     function toggleTheme() {
       const body = document.body;
       const themeBtn = document.querySelector('.theme-toggle-btn');
@@ -584,7 +556,6 @@
       }
     }
 
-    // View State Reset Helper
     function resetView(viewId) {
       switch (viewId) {
         case 'searchView':
@@ -605,7 +576,6 @@
       }
     }
 
-    // View Switcher Router
     function showView(viewId) {
       hideLoader();
       if (currentActiveViewId && currentActiveViewId !== viewId) {
@@ -625,7 +595,6 @@
       }
     }
 
-    // Auth & Startup Flow
     window.addEventListener("DOMContentLoaded", async function() {
       const savedUser = localStorage.getItem("app_user");
       if (savedUser) {
@@ -735,7 +704,6 @@
       showView("resultView");
     }
 
-    // API Caller
     async function apiCall(action, payload = {}) {
       try {
         payload.action = action;
@@ -755,7 +723,6 @@
       }
     }
 
-    // Camera QR Scanner Logic
     function startLiveScanner() {
       if (isScannerRunning) return;
       document.getElementById("cameraStatus").innerText = "🎥 جاري تشغيل الكاميرا المباشرة...";
@@ -817,7 +784,6 @@
       renderResult(res);
     }
 
-    // Search Logic with Debounce
     async function executeSearch() {
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
@@ -831,14 +797,14 @@
 
       resDiv.innerHTML = "";
       if (res.status === "exact_match") {
-        processScannedText(res.id);
+        processScannedText(res.id); // Send real ID
       } else if (res.status === "suggestions") {
         resDiv.innerHTML = "<div style='font-weight:bold; color:var(--accent-gold); margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
         res.matches.forEach(function(item) {
           var btn = document.createElement("button");
           btn.className = "suggestion-btn";
           btn.innerText = "👤 " + item.name;
-          btn.onclick = function() { processScannedText(item.id); };
+          btn.onclick = function() { processScannedText(item.id); }; // Send real ID
           resDiv.appendChild(btn);
         });
       } else {
@@ -846,7 +812,6 @@
       }
     }
 
-    // Student Addition
     async function submitNewStudent() {
       var name = document.getElementById("newStudentName").value.trim();
       if (!name) { 
@@ -871,7 +836,6 @@
       }
     }
 
-    // Settings Security & Management
     async function unlockSettings() {
       var pw = document.getElementById("gatePassword").value;
       if (!pw) {
