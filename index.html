@@ -588,6 +588,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       if (viewId === "scanView") {
+        isProcessingScan = false;
         startLiveScanner();
       }
     }
@@ -761,6 +762,7 @@
     }
 
     function restartScanner() {
+      isProcessingScan = false;
       stopLiveScanner().then(() => {
         setTimeout(startLiveScanner, 300);
       });
@@ -782,9 +784,9 @@
       text = (text || "").trim();
       if (!text) return "";
 
-      // 1. Check for query parameter format: id=value
-      var m = text.match(/[?&]id=([^&#]+)/);
-      if (m) return decodeURIComponent(m[1]);
+      // 1. Check for query parameter format: id=value or ?id=value
+      var m = text.match(/id=([^&#]+)/);
+      if (m && m[1]) return decodeURIComponent(m[1]).trim();
 
       // 2. Check JSON string payload
       try {
@@ -792,10 +794,8 @@
         if (parsed && parsed.id) return String(parsed.id).trim();
       } catch(e) {}
 
-      // 3. Fallback for raw encrypted token or plain alphanumeric ID
-      if (/^[0-9A-Za-z_=-]+$/.test(text)) return text;
-
-      return "";
+      // 3. Plain ID numeric or raw string fallback
+      return text;
     }
 
     async function processScannedText(text) {
