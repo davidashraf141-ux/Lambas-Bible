@@ -1,1 +1,1 @@
-# Qr-Scanner
+# Lambas Bible
