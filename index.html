@@ -61,11 +61,11 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Vertically center content */
-      align-items: center;     /* Horizontally center content */
+      justify-content: center;
+      align-items: center;
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
-      padding-top: 60px; /* Offset for Top App Bar */
+      padding-top: 60px;
       padding-bottom: 20px;
     }
 
@@ -115,6 +115,59 @@
       transition: all 0.2s;
     }
 
+    /* Floating Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 90%;
+      max-width: 400px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+      pointer-events: auto;
+      color: #fff;
+    }
+
+    .toast.error { background: #ef4444; }
+    .toast.success { background: #16a34a; }
+    .toast.info { background: #2563eb; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+
+    /* Overlay Loader */
+    .loader-overlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(13, 27, 42, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      border-radius: 24px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
     /* Centered Main View Container */
     .container {
       max-width: 500px;
@@ -125,7 +178,7 @@
       border-radius: 24px;
       box-shadow: var(--shadow);
       border: 1.5px solid var(--card-border);
-      margin: auto 0; /* Auto vertical margin reinforces exact viewport centering */
+      margin: auto 0;
       position: relative;
     }
 
@@ -277,8 +330,7 @@
       margin-bottom: 12px;
     }
 
-    /* Loader */
-    .loader { display: none; text-align: center; padding: 20px; color: var(--accent-gold); font-weight: 700; }
+    /* Spinner */
     .spinner {
       width: 40px; height: 40px;
       border: 4px solid var(--chip-border);
@@ -348,6 +400,9 @@
 </head>
 <body data-theme="dark">
 
+  <!-- Floating Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
   <!-- Native Top Bar -->
   <header class="top-app-bar">
     <div class="brand">
@@ -360,6 +415,12 @@
   <button id="homeBtn" class="home-btn" style="display:none;" onclick="showView('dashboardView')">🏠 الرئيسية</button>
 
   <div class="container">
+
+    <!-- Global Overlay Loader -->
+    <div id="loader" class="loader-overlay">
+      <div class="spinner"></div>
+      <div id="loaderText">جاري معالجة الطلب...</div>
+    </div>
 
     <!-- 0. Login View -->
     <div id="loginView">
@@ -462,12 +523,6 @@
       </div>
     </div>
 
-    <!-- Global Loader -->
-    <div id="loader" class="loader">
-      <div class="spinner"></div>
-      <div id="loaderText">جاري معالجة الطلب...</div>
-    </div>
-
     <!-- Result View -->
     <div id="resultView" style="display:none;">
       <div class="icon" id="rIcon">✓</div>
@@ -489,7 +544,18 @@
     var isScannerRunning = false;
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
-    var localRosterCache = null;
+
+    // Floating Notification Toast Function
+    function showToast(message, type = "error") {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
 
     // JWT Decoder Helper
     function parseJwt(token) {
@@ -536,25 +602,17 @@
           if (nameInput) nameInput.value = '';
           if (addResult) addResult.innerHTML = '';
           break;
-        case 'settingsView':
-          var passInput = document.getElementById('gatePassword');
-          var settingsLock = document.getElementById('settingsLock');
-          var settingsForm = document.getElementById('settingsForm');
-          if (passInput) passInput.value = '';
-          if (settingsLock) settingsLock.style.display = 'block';
-          if (settingsForm) settingsForm.style.display = 'none';
-          verifiedPassword = "";
-          break;
       }
     }
 
     // View Switcher Router
     function showView(viewId) {
+      hideLoader();
       if (currentActiveViewId && currentActiveViewId !== viewId) {
         resetView(currentActiveViewId);
       }
 
-      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "loader", "resultView"].forEach(function(id) {
+      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "resultView"].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.style.display = (id === viewId) ? "block" : "none";
       });
@@ -575,6 +633,7 @@
           currentUser = JSON.parse(savedUser);
           showLoader("جاري التحقق من صلاحيات الحساب...");
           const authRes = await apiCall("check_auth", { email: currentUser.email });
+          hideLoader();
           if (authRes && authRes.authorized) {
             setupUserProfileUI();
             checkDirectUrlScan();
@@ -582,6 +641,7 @@
             logoutUser("❌ الحساب غير مصرح له بفتح النظام.");
           }
         } catch (e) {
+          hideLoader();
           logoutUser();
         }
       } else {
@@ -598,6 +658,7 @@
 
       showLoader("جاري التحقق من صلاحية البريد الإلكتروني...");
       const authRes = await apiCall("check_auth", { email: payload.email });
+      hideLoader();
 
       if (authRes && authRes.authorized) {
         currentUser = {
@@ -625,6 +686,7 @@
     function logoutUser(msg) {
       localStorage.removeItem("app_user");
       currentUser = null;
+      verifiedPassword = "";
       stopLiveScanner();
       document.getElementById("homeBtn").style.display = "none";
       if (msg) showLoginError(msg);
@@ -651,7 +713,11 @@
 
     function showLoader(text) {
       document.getElementById("loaderText").innerText = text || "جاري التحميل...";
-      showView("loader");
+      document.getElementById("loader").style.display = "flex";
+    }
+
+    function hideLoader() {
+      document.getElementById("loader").style.display = "none";
     }
 
     function renderResult(r) {
@@ -731,7 +797,6 @@
 
     function onScanError(errorMessage) {}
 
-    // ID Extraction supporting plain ID, URL query ?id=X, and full WebApp URL
     function extractId(text) {
       text = (text || "").trim();
       var m = text.match(/[?&]id=([^&#]+)/);
@@ -748,16 +813,16 @@
       }
       showLoader("جاري تسجيل الحضور...");
       const res = await apiCall("scan", { id: id, email: currentUser ? currentUser.email : "" });
+      hideLoader();
       renderResult(res);
     }
 
     // Search Logic with Debounce
-    var searchDebounceTimer;
     async function executeSearch() {
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
       if (!name) { 
-        resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>⚠️ يرجى إدخال اسم</p>"; 
+        showToast("⚠️ يرجى إدخال اسم للبحث", "error");
         return; 
       }
 
@@ -777,52 +842,61 @@
           resDiv.appendChild(btn);
         });
       } else {
-        resDiv.innerHTML = "<p style='color:#ef4444; text-align:center;'>❌ لم نجد نتائج مطابقة</p>";
+        showToast("❌ لم نجد نتائج مطابقة", "error");
       }
     }
 
-    // Student Addition (Clean ID encoding)
+    // Student Addition
     async function submitNewStudent() {
       var name = document.getElementById("newStudentName").value.trim();
-      if (!name) { alert("يرجى كتابة اسم المخدوم"); return; }
+      if (!name) { 
+        showToast("يرجى كتابة اسم المخدوم", "error"); 
+        return; 
+      }
 
       showLoader("جاري التسجيل وإنشاء الكارت...");
       const res = await apiCall("add_student", { name: name, email: currentUser ? currentUser.email : "" });
+      hideLoader();
 
       if (res.success) {
+        showToast("🎉 تم إنشاء المخدوم بنجاح!", "success");
         var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
         if (res.driveUrl) {
           html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='margin-top:10px;'>📁 فتح الكارت في Google Drive</a>";
         }
         document.getElementById("addResult").innerHTML = html;
         document.getElementById("newStudentName").value = "";
-        showView("addView");
       } else {
-        alert("فشل الإضافة: " + res.message);
-        showView("addView");
+        showToast("فشل الإضافة: " + res.message, "error");
       }
     }
 
-    // Settings
+    // Settings Security & Management
     async function unlockSettings() {
       var pw = document.getElementById("gatePassword").value;
-      if (!pw) return;
+      if (!pw) {
+        showToast("يرجى أدخل كلمة المرور", "error");
+        return;
+      }
       showLoader("جاري التحقق...");
       const res = await apiCall("verify_settings_password", { password: pw });
+      hideLoader();
+
       if (res.valid) {
-        verifiedPassword = pw;
+        verifiedPassword = String(pw).trim();
         document.getElementById("settingsLock").style.display = "none";
         document.getElementById("settingsForm").style.display = "block";
         loadSettingsData();
       } else {
-        alert("❌ كلمة المرور غير صحيحة");
-        showView("settingsView");
+        showToast("❌ كلمة المرور غير صحيحة", "error");
       }
     }
 
     async function loadSettingsData() {
       showLoader("جاري تحميل الإعدادات...");
       const res = await apiCall("get_settings");
+      hideLoader();
+
       if (res.success) {
         var s = res.settings;
         document.getElementById("cfgStartTime").value = s.startTime;
@@ -832,7 +906,6 @@
         for (let d = 0; d <= 6; d++) {
           document.getElementById("day" + d).checked = days.includes(d);
         }
-        showView("settingsView");
       }
     }
 
@@ -841,6 +914,7 @@
       for (let d = 0; d <= 6; d++) {
         if (document.getElementById("day" + d).checked) allowedDays.push(d);
       }
+
       showLoader("جاري حفظ الإعدادات...");
       const res = await apiCall("save_settings", {
         password: verifiedPassword,
@@ -850,14 +924,17 @@
         newPassword: document.getElementById("cfgNewPassword").value,
         allowedDays: allowedDays
       });
-      alert(res.message);
+      hideLoader();
+
       if (res.success) {
+        showToast(res.message, "success");
         if (document.getElementById("cfgNewPassword").value) {
-          verifiedPassword = document.getElementById("cfgNewPassword").value;
+          verifiedPassword = String(document.getElementById("cfgNewPassword").value).trim();
         }
         document.getElementById("cfgNewPassword").value = "";
+      } else {
+        showToast(res.message, "error");
       }
-      showView("settingsView");
     }
   </script>
 </body>
