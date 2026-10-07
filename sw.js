@@ -1,8 +1,10 @@
-const CACHE_NAME = "qr-attendance-v2";
+const CACHE_NAME = "qr-attendance-v3";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./new-icon-192.png",
+  "./new-icon-512.png",
   "https://lh3.googleusercontent.com/d/1Th2BF-Xb5qQCUKYvr51aT1gx_ZVG52oY", // <--- Add your background image path here (or full image URL)
   "https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js",
   "https://accounts.google.com/gsi/client"
