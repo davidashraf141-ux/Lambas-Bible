@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>نظام الحضور والخدمة الذكي</title>
+  <title>Lambas Bible</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -271,7 +271,7 @@
       background: #000;
       position: relative;
       margin-bottom: 12px;
-      min-height: 250px;
+      min-height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -519,13 +519,95 @@
     var isProcessingScan = false;
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
-    var activeActionLock = false;
 
-    function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
+    // Request Management Queue (Prevents app freeze on concurrent / repeated requests)
+    class RequestQueueManager {
+      constructor() {
+        this.queue = [];
+        this.isProcessing = false;
+      }
+
+      enqueue(action, payload, resolve, reject) {
+        this.queue.push({ action, payload, resolve, reject, retries: 0 });
+        this.processQueue();
+      }
+
+      async processQueue() {
+        if (this.isProcessing || this.queue.length === 0) return;
+        this.isProcessing = true;
+
+        const req = this.queue.shift();
+
+        try {
+          const result = await this.executeFetch(req.action, req.payload);
+          req.resolve(result);
+        } catch (error) {
+          if (req.retries < 2) {
+            req.retries++;
+            this.queue.unshift(req); // Re-queue request for retry
+            await new Promise(r => setTimeout(r, 600));
+          } else {
+            req.reject(error);
+          }
+        } finally {
+          this.isProcessing = false;
+          setTimeout(() => this.processQueue(), 50); // Fluid throttle between consecutive execution
+        }
+      }
+
+      async executeFetch(action, payload) {
+        payload.action = action;
+        payload.requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        if (currentUser && currentUser.email) {
+          payload.email = currentUser.email;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout protect
+
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          return await res.json();
+        } catch(err) {
+          clearTimeout(timeoutId);
+          throw err;
+        }
+      }
+    }
+
+    const apiQueue = new RequestQueueManager();
+
+    function apiCall(action, payload = {}) {
+      return new Promise((resolve, reject) => {
+        apiQueue.enqueue(action, payload, resolve, reject);
       });
+    }
+
+    function extractId(text) {
+      if (!text) return "";
+      text = String(text).trim();
+
+      // Direct ID string format standard
+      if (/^[A-Za-z0-9_-]+$/.test(text) && !text.includes("http") && !text.includes("{")) {
+        return text;
+      }
+
+      var m = text.match(/[?&]id=([^&#]+)/);
+      if (m && m[1]) return decodeURIComponent(m[1]).trim();
+
+      try {
+        var parsed = JSON.parse(text);
+        if (parsed && parsed.id) return String(parsed.id).trim();
+      } catch(e) {}
+
+      return text;
     }
 
     function showToast(message, type = "error") {
@@ -598,7 +680,7 @@
 
       if (viewId === "scanView") {
         isProcessingScan = false;
-        startLiveScanner();
+        setTimeout(startLiveScanner, 150);
       }
     }
 
@@ -633,20 +715,25 @@
       }
 
       showLoader("جاري التحقق من صلاحية البريد الإلكتروني...");
-      const authRes = await apiCall("check_auth", { email: payload.email });
-      hideLoader();
+      try {
+        const authRes = await apiCall("check_auth", { email: payload.email });
+        hideLoader();
 
-      if (authRes && authRes.authorized) {
-        currentUser = {
-          email: payload.email.toLowerCase().trim(),
-          name: payload.name || payload.email,
-          picture: payload.picture || "https://lh3.googleusercontent.com/a/default-user"
-        };
-        localStorage.setItem("app_user", JSON.stringify(currentUser));
-        setupUserProfileUI();
-        checkDirectUrlScan();
-      } else {
-        showLoginError("❌ عذراً، البريد الإلكتروني (" + payload.email + ") غير مصرح له بالدخول.");
+        if (authRes && authRes.authorized) {
+          currentUser = {
+            email: payload.email.toLowerCase().trim(),
+            name: payload.name || payload.email,
+            picture: payload.picture || "https://lh3.googleusercontent.com/a/default-user"
+          };
+          localStorage.setItem("app_user", JSON.stringify(currentUser));
+          setupUserProfileUI();
+          checkDirectUrlScan();
+        } else {
+          showLoginError("❌ عذراً، البريد الإلكتروني (" + payload.email + ") غير مصرح له بالدخول.");
+        }
+      } catch(e) {
+        hideLoader();
+        showLoginError("حدث خطأ في الاتصال بالخادم.");
       }
     }
 
@@ -711,61 +798,37 @@
       showView("resultView");
     }
 
-    async function apiCall(action, payload = {}) {
-      if (activeActionLock) {
-        return { success: false, kind: "error", icon: "⚠️", title: "جاري المعالجة", message: "يرجى الانتظار لحين اكتمال الطلب." };
-      }
-      activeActionLock = true;
-
-      payload.action = action;
-      payload.requestId = generateUUID();
-      if (currentUser && currentUser.email) {
-        payload.email = currentUser.email;
-      }
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        activeActionLock = false;
-        return data;
-      } catch (e) {
-        console.error("API Call Error:", e);
-        activeActionLock = false;
-        return { success: false, kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "حدث خطأ بالاتصال بالسيرفر." };
-      }
-    }
-
     function startLiveScanner() {
       if (isScannerRunning) return;
       document.getElementById("cameraStatus").innerText = "🎥 جاري تشغيل الكاميرا المباشرة...";
       
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode("qr-reader");
+      const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+
+      try {
+        if (!html5QrCode) {
+          html5QrCode = new Html5Qrcode("qr-reader");
+        }
+        
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
+          .then(() => {
+            isScannerRunning = true;
+            document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل، ضع الـ QR أمام العدسة";
+          })
+          .catch(() => {
+            html5QrCode.start({ facingMode: "user" }, config, onScanSuccess, onScanError)
+              .then(() => {
+                isScannerRunning = true;
+                document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن";
+              })
+              .catch((err) => {
+                isScannerRunning = false;
+                document.getElementById("cameraStatus").innerText = "❌ تعذر فتح الكاميرا: تأكد من منح الصلاحيات";
+              });
+          });
+      } catch (err) {
+        isScannerRunning = false;
+        document.getElementById("cameraStatus").innerText = "❌ خطأ في البدء، اضغط إعادة تشغيل الكاميرا";
       }
-
-      const config = { fps: 15, qrbox: { width: 220, height: 220 } };
-
-      html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
-        .then(() => {
-          isScannerRunning = true;
-          document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن، ضع الـ QR أمام العدسة";
-        })
-        .catch(() => {
-          html5QrCode.start({ facingMode: "user" }, config, onScanSuccess, onScanError)
-            .then(() => {
-              isScannerRunning = true;
-              document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن";
-            })
-            .catch(() => {
-              isScannerRunning = false;
-              document.getElementById("cameraStatus").innerText = "❌ تعذر فتح الكاميرا: تأكد من منح صلاحية الوصول للكاميرا";
-            });
-        });
     }
 
     function stopLiveScanner() {
@@ -774,7 +837,6 @@
           isScannerRunning = false;
         }).catch(err => {
           isScannerRunning = false;
-          console.error(err);
         });
       }
       return Promise.resolve();
@@ -783,7 +845,7 @@
     function restartScanner() {
       isProcessingScan = false;
       stopLiveScanner().then(() => {
-        setTimeout(startLiveScanner, 300);
+        setTimeout(startLiveScanner, 200);
       });
     }
 
@@ -800,21 +862,6 @@
 
     function onScanError(errorMessage) {}
 
-    function extractId(text) {
-      text = (text || "").trim();
-      if (!text) return "";
-
-      var m = text.match(/id=([^&#]+)/);
-      if (m && m[1]) return decodeURIComponent(m[1]).trim();
-
-      try {
-        var parsed = JSON.parse(text);
-        if (parsed && parsed.id) return String(parsed.id).trim();
-      } catch(e) {}
-
-      return text;
-    }
-
     async function processScannedText(text) {
       var id = extractId(text);
       if (!id) {
@@ -822,19 +869,25 @@
         return;
       }
       showLoader("جاري تسجيل الحضور...");
-      const res = await apiCall("scan", { id: id, email: currentUser ? currentUser.email : "" });
-      hideLoader();
-      renderResult(res);
+      try {
+        const res = await apiCall("scan", { id: id, email: currentUser ? currentUser.email : "" });
+        hideLoader();
+        renderResult(res);
+      } catch (e) {
+        hideLoader();
+        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "فشل الاتصال الخاطف بالسيرفر" });
+      }
     }
 
     async function processDirectAttendance(rawId) {
-      if (!rawId) {
+      var cleanId = extractId(rawId);
+      if (!cleanId) {
         renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تعذر الحصول على معرف المخدوم" });
         return;
       }
       showLoader("جاري تسجيل الحضور...");
       try {
-        const res = await apiCall("scan", { id: String(rawId).trim(), email: currentUser ? currentUser.email : "" });
+        const res = await apiCall("scan", { id: cleanId, email: currentUser ? currentUser.email : "" });
         hideLoader();
         renderResult(res);
       } catch (e) {
@@ -884,7 +937,8 @@
 
     async function submitNewStudent() {
       var addBtn = document.getElementById("btnAddStudent");
-      var name = document.getElementById("newStudentName").value.trim();
+      var nameInput = document.getElementById("newStudentName");
+      var name = nameInput.value.trim();
       
       if (!name) { 
         showToast("يرجى كتابة اسم المخدوم", "error"); 
@@ -899,16 +953,16 @@
         hideLoader();
         addBtn.disabled = false;
 
-        if (res.success) {
+        if (res && res.success) {
           showToast("🎉 تم إنشاء المخدوم بنجاح!", "success");
           var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
           if (res.driveUrl) {
             html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='margin-top:10px;'>📁 فتح الكارت في Google Drive</a>";
           }
           document.getElementById("addResult").innerHTML = html;
-          document.getElementById("newStudentName").value = "";
+          nameInput.value = "";
         } else {
-          showToast("فشل الإضافة: " + (res.message || "حدث خطأ غير متوقع"), "error");
+          showToast("فشل الإضافة: " + ((res && res.message) ? res.message : "تعذر الإضافة بسبب الضغط الحالى"), "error");
         }
       } catch (e) {
         hideLoader();
@@ -925,33 +979,42 @@
         return;
       }
       showLoader("جاري التحقق...");
-      const res = await apiCall("verify_settings_password", { password: pw });
-      hideLoader();
+      try {
+        const res = await apiCall("verify_settings_password", { password: pw });
+        hideLoader();
 
-      if (res.valid) {
-        verifiedPassword = String(pw).trim();
-        document.getElementById("settingsLock").style.display = "none";
-        document.getElementById("settingsForm").style.display = "block";
-        loadSettingsData();
-      } else {
-        showToast("❌ كلمة المرور غير صحيحة", "error");
+        if (res && res.valid) {
+          verifiedPassword = String(pw).trim();
+          document.getElementById("settingsLock").style.display = "none";
+          document.getElementById("settingsForm").style.display = "block";
+          loadSettingsData();
+        } else {
+          showToast("❌ كلمة المرور غير صحيحة", "error");
+        }
+      } catch(e) {
+        hideLoader();
+        showToast("خطأ في التحقق من كلمة المرور", "error");
       }
     }
 
     async function loadSettingsData() {
       showLoader("جاري تحميل الإعدادات...");
-      const res = await apiCall("get_settings");
-      hideLoader();
+      try {
+        const res = await apiCall("get_settings");
+        hideLoader();
 
-      if (res.success) {
-        var s = res.settings;
-        document.getElementById("cfgStartTime").value = s.startTime;
-        document.getElementById("cfgEndTime").value = s.endTime;
-        document.getElementById("cfgAcceptedDelay").value = s.acceptedDelay;
-        var days = s.allowedDays || [0,1,2,3,4,5,6];
-        for (let d = 0; d <= 6; d++) {
-          document.getElementById("day" + d).checked = days.includes(d);
+        if (res && res.success) {
+          var s = res.settings;
+          document.getElementById("cfgStartTime").value = s.startTime;
+          document.getElementById("cfgEndTime").value = s.endTime;
+          document.getElementById("cfgAcceptedDelay").value = s.acceptedDelay;
+          var days = s.allowedDays || [0,1,2,3,4,5,6];
+          for (let d = 0; d <= 6; d++) {
+            document.getElementById("day" + d).checked = days.includes(d);
+          }
         }
+      } catch(e) {
+        hideLoader();
       }
     }
 
@@ -962,25 +1025,30 @@
       }
 
       showLoader("جاري حفظ الإعدادات...");
-      const res = await apiCall("save_settings", {
-        password: verifiedPassword,
-        startTime: document.getElementById("cfgStartTime").value,
-        endTime: document.getElementById("cfgEndTime").value,
-        acceptedDelay: document.getElementById("cfgAcceptedDelay").value,
-        newPassword: document.getElementById("cfgNewPassword").value,
-        allowedDays: allowedDays
-      });
-      hideLoader();
+      try {
+        const res = await apiCall("save_settings", {
+          password: verifiedPassword,
+          startTime: document.getElementById("cfgStartTime").value,
+          endTime: document.getElementById("cfgEndTime").value,
+          acceptedDelay: document.getElementById("cfgAcceptedDelay").value,
+          newPassword: document.getElementById("cfgNewPassword").value,
+          allowedDays: allowedDays
+        });
+        hideLoader();
 
-      if (res.success) {
-        showToast(res.message, "success");
-        var newPw = document.getElementById("cfgNewPassword").value;
-        if (newPw && newPw.trim() !== "") {
-          verifiedPassword = String(newPw).trim();
+        if (res && res.success) {
+          showToast(res.message, "success");
+          var newPw = document.getElementById("cfgNewPassword").value;
+          if (newPw && newPw.trim() !== "") {
+            verifiedPassword = String(newPw).trim();
+          }
+          document.getElementById("cfgNewPassword").value = "";
+        } else {
+          showToast((res && res.message) ? res.message : "فشل حفظ الإعدادات", "error");
         }
-        document.getElementById("cfgNewPassword").value = "";
-      } else {
-        showToast(res.message, "error");
+      } catch(e) {
+        hideLoader();
+        showToast("خطأ في حفظ الإعدادات", "error");
       }
     }
   </script>
