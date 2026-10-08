@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Lambas Bible</title>
+  <title>نظام الحضور والخدمة الذكي</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -223,6 +223,7 @@
     }
 
     .tile:active { transform: scale(0.96); }
+    .tile:disabled { opacity: 0.5; cursor: not-allowed; }
     .tile .ico { font-size: 32px; }
     .tile.primary {
       background: linear-gradient(135deg, #d4a373 0%, #b45309 100%);
@@ -261,6 +262,7 @@
     }
 
     .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); }
 
     .camera-wrapper {
@@ -351,6 +353,7 @@
       color: var(--text-main);
       font-weight: 600;
     }
+    .suggestion-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
@@ -450,7 +453,7 @@
     <div id="searchView" style="display:none;">
       <h2>🔍 التحضير السريع بالاسم</h2>
       <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا..." autocomplete="off">
-      <button class="btn" onclick="executeSearch()">بحث</button>
+      <button class="btn" id="btnExecuteSearch" onclick="executeSearch()">بحث</button>
       <div id="searchResults" style="margin-top:15px;"></div>
     </div>
 
@@ -458,7 +461,7 @@
     <div id="addView" style="display:none;">
       <h2>➕ إضافة مخدوم جديد</h2>
       <input type="text" id="newStudentName" placeholder="اسم المخدوم ثلاثي..." autocomplete="off">
-      <button class="btn" onclick="submitNewStudent()">حفظ وتوليد الكارت 🎨</button>
+      <button class="btn" id="btnSubmitNewStudent" onclick="submitNewStudent()">حفظ وتوليد الكارت 🎨</button>
       <div id="addResult" style="margin-top:12px; text-align:center;"></div>
     </div>
 
@@ -467,7 +470,7 @@
       <h2>🔒 إعدادات النظام</h2>
       <div id="settingsLock">
         <input type="password" id="gatePassword" placeholder="ادخل كلمة المرور">
-        <button class="btn" onclick="unlockSettings()">دخول</button>
+        <button class="btn" id="btnUnlockSettings" onclick="unlockSettings()">دخول</button>
       </div>
 
       <div id="settingsForm" style="display:none;">
@@ -492,7 +495,7 @@
         <label style="font-weight:bold; font-size:12px;">كلمة مرور جديدة (اختياري)</label>
         <input type="password" id="cfgNewPassword" placeholder="اتركها فارغة للإبقاء على الحالية">
 
-        <button class="btn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+        <button class="btn" id="btnSaveSettings" onclick="saveSettings()">💾 حفظ الإعدادات</button>
       </div>
     </div>
 
@@ -516,8 +519,28 @@
     var html5QrCode = null;
     var isScannerRunning = false;
     var isProcessingScan = false;
+    var lastProcessedScanTime = 0;
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
+    var isApiBusy = false;
+
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function setControlsDisabled(disabled) {
+      const selectors = ['button', 'input', 'select'];
+      selectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => {
+          if (el.id !== 'themeBtn' && !el.classList.contains('logout-btn')) {
+            el.disabled = disabled;
+          }
+        });
+      });
+    }
 
     function showToast(message, type = "error") {
       const container = document.getElementById("toastContainer");
@@ -702,22 +725,49 @@
       showView("resultView");
     }
 
-    async function apiCall(action, payload = {}) {
-      try {
-        payload.action = action;
-        if (currentUser && currentUser.email) {
-          payload.email = currentUser.email;
+    async function apiCall(action, payload = {}, retries = 2) {
+      if (isApiBusy) {
+        return { success: false, kind: "error", icon: "⚠️", title: "جاري المعالجة", message: "يرجى الانتظار لحين انتهاء الطلب الحالي." };
+      }
+      isApiBusy = true;
+      setControlsDisabled(true);
+
+      payload.action = action;
+      payload.requestId = payload.requestId || generateUUID();
+      payload.timestamp = Date.now();
+      if (currentUser && currentUser.email) {
+        payload.email = currentUser.email;
+      }
+
+      let attempt = 0;
+      while (attempt <= retries) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          const res = await fetch(API_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          const data = await res.json();
+          isApiBusy = false;
+          setControlsDisabled(false);
+          return data;
+        } catch (e) {
+          attempt++;
+          if (attempt > retries) {
+            console.error("API Call Error after retries:", e);
+            isApiBusy = false;
+            setControlsDisabled(false);
+            return { success: false, kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "تعذر الاتصال بالسيرفر. يرجى المحاولة مرة أخرى." };
+          }
+          await new Promise(res => setTimeout(res, 1000 * attempt));
         }
-        const res = await fetch(API_URL, {
-          method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        return await res.json();
-      } catch (e) {
-        console.error("API Call Error:", e);
-        return { success: false, kind: "error", icon: "❌", title: "خطأ بالاتصال", message: e.toString() };
       }
     }
 
@@ -769,8 +819,12 @@
     }
 
     function onScanSuccess(decodedText) {
-      if (isProcessingScan) return;
+      const now = Date.now();
+      if (isProcessingScan || (now - lastProcessedScanTime < 2500)) return;
+      
       isProcessingScan = true;
+      lastProcessedScanTime = now;
+
       stopLiveScanner().then(() => {
         processScannedText(decodedText).finally(() => {
           isProcessingScan = false;
@@ -784,17 +838,14 @@
       text = (text || "").trim();
       if (!text) return "";
 
-      // 1. Check for query parameter format: id=value or ?id=value
       var m = text.match(/id=([^&#]+)/);
       if (m && m[1]) return decodeURIComponent(m[1]).trim();
 
-      // 2. Check JSON string payload
       try {
         var parsed = JSON.parse(text);
         if (parsed && parsed.id) return String(parsed.id).trim();
       } catch(e) {}
 
-      // 3. Plain ID numeric or raw string fallback
       return text;
     }
 
