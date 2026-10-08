@@ -551,7 +551,7 @@
           }
         } finally {
           this.isProcessing = false;
-          setTimeout(() => this.processQueue(), 50); // Fluid throttle between consecutive executions
+          setTimeout(() => this.processQueue(), 50); // Fluid throttle between consecutive execution
         }
       }
 
@@ -574,14 +574,7 @@
             signal: controller.signal
           });
           clearTimeout(timeoutId);
-
-          const rawText = await res.text();
-          try {
-            return JSON.parse(rawText);
-          } catch(e) {
-            // Google Apps Script executed successfully but failed JSON redirect response
-            throw new Error("CORS_REDIRECT_DROP");
-          }
+          return await res.json();
         } catch(err) {
           clearTimeout(timeoutId);
           throw err;
@@ -707,8 +700,7 @@
           }
         } catch (e) {
           hideLoader();
-          // Fallback if auth server check drops response
-          setupUserProfileUI();
+          logoutUser();
         }
       } else {
         showView('loginView');
@@ -741,7 +733,7 @@
         }
       } catch(e) {
         hideLoader();
-        showLoginError("حدث خطأ في الاتصال بالسيرفر.");
+        showLoginError("حدث خطأ في الاتصال بالخادم.");
       }
     }
 
@@ -883,14 +875,7 @@
         renderResult(res);
       } catch (e) {
         hideLoader();
-        // Fallback result when Google Apps Script writes to sheet but fails redirect payload
-        renderResult({
-          kind: "success",
-          icon: "✓",
-          title: "تم الحفظ بالسيرفر",
-          name: "كود المخدوم: " + id,
-          message: "تم تسجيل الحضور في الشيت بنجاح."
-        });
+        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "فشل الاتصال الخاطف بالسيرفر" });
       }
     }
 
@@ -907,13 +892,7 @@
         renderResult(res);
       } catch (e) {
         hideLoader();
-        renderResult({
-          kind: "success",
-          icon: "✓",
-          title: "تم الحفظ بالسيرفر",
-          name: "كود المخدوم: " + cleanId,
-          message: "تم تسجيل الحضور في الشيت بنجاح."
-        });
+        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: e.toString() });
       }
     }
 
@@ -988,7 +967,7 @@
       } catch (e) {
         hideLoader();
         addBtn.disabled = false;
-        showToast("🎉 تم إرسال طلب الإضافة للسيرفر، يرجى فحص الشيت", "success");
+        showToast("حدث خطأ بالاتصال بالسيرفر", "error");
       }
     }
 
