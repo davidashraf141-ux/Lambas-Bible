@@ -1,12 +1,12 @@
-const CACHE_NAME = "attendance-app-v4";
+const CACHE_NAME = "attendance-app-v5";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./css/styles.css",
   "./js/app.js",
-  "./manifest2.json",
-  "./new-icon-192.png",
-  "./new-icon-512.png"
+  "./manifest.json",
+  "./App-Icon-192.png",
+  "./App-Icon-512.png"
 ];
 
 // Install Event - Pre-cache core app shell assets
