@@ -3,12 +3,12 @@
   "short_name": "Lambas Bible",
   "icons": [
     {
-      "src": "new-icon-192.png",
+      "src": "App-Icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "new-icon-512.png",
+      "src": "App-Icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
