@@ -15,9 +15,9 @@
   <style>
     :root {
       --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
-      --app-bar-bg: rgba(13, 27, 42, 0.9);
+      --app-bar-bg: rgba(13, 27, 42, 0.85);
       --card-bg: rgba(22, 36, 56, 0.75);
-      --card-border: rgba(224, 169, 109, 0.4);
+      --card-border: rgba(224, 169, 109, 0.35);
       --text-main: #f1f5f9;
       --text-sub: #cbd5e1;
       --accent-gold: #f4c430;
@@ -25,14 +25,14 @@
       --input-bg: rgba(13, 27, 42, 0.6);
       --chip-bg: rgba(30, 41, 59, 0.8);
       --chip-border: rgba(51, 65, 85, 0.6);
-      --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
     [data-theme="light"] {
-      --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-      --app-bar-bg: rgba(255, 255, 255, 0.9);
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --app-bar-bg: rgba(255, 255, 255, 0.85);
       --card-bg: rgba(255, 255, 255, 0.85);
-      --card-border: rgba(180, 83, 9, 0.3);
+      --card-border: rgba(180, 83, 9, 0.25);
       --text-main: #0f172a;
       --text-sub: #475569;
       --accent-gold: #b45309;
@@ -40,7 +40,7 @@
       --input-bg: rgba(248, 250, 252, 0.9);
       --chip-bg: #f8fafc;
       --chip-border: #cbd5e1;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      --shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.08);
     }
 
     * { 
@@ -48,7 +48,6 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 0;
-      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     }
 
     html, body {
@@ -75,8 +74,8 @@
       top: 0; left: 0; right: 0;
       height: 64px;
       background: var(--app-bar-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       color: var(--text-main);
       display: flex;
       align-items: center;
@@ -85,6 +84,12 @@
       z-index: 1000;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       border-bottom: 1px solid var(--card-border);
+      animation: slideDownBar 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideDownBar {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .top-app-bar .brand {
@@ -121,8 +126,10 @@
       cursor: pointer;
       font-size: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
     }
-    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn:hover { transform: scale(1.08); }
+    .icon-btn:active { transform: scale(0.90); }
 
     .toast-container {
       position: fixed;
@@ -144,23 +151,29 @@
       font-size: 14px;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      animation: fadeIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+      animation: toastIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), toastOut 0.3s ease-in 2.7s forwards;
       pointer-events: auto;
       color: #fff;
     }
-    .toast.error { background: rgba(239, 68, 68, 0.9); }
-    .toast.success { background: rgba(22, 163, 74, 0.9); }
-    .toast.info { background: rgba(37, 99, 235, 0.9); }
+    .toast.error { background: rgba(239, 68, 68, 0.95); }
+    .toast.success { background: rgba(22, 163, 74, 0.95); }
+    .toast.info { background: rgba(37, 99, 235, 0.95); }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+    @keyframes toastIn { 
+      0% { opacity: 0; transform: translateY(-20px) scale(0.9); } 
+      100% { opacity: 1; transform: translateY(0) scale(1); } 
+    }
+    @keyframes toastOut { 
+      0% { opacity: 1; transform: translateY(0) scale(1); } 
+      100% { opacity: 0; transform: translateY(-15px) scale(0.95); } 
+    }
 
     .loader-overlay {
       display: none;
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(13, 27, 42, 0.85);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
       z-index: 500;
       border-radius: 28px;
       flex-direction: column;
@@ -168,23 +181,44 @@
       align-items: center;
       color: var(--accent-gold);
       font-weight: 700;
+      animation: fadeIn 0.25s ease;
     }
 
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Modern Fluid Container Transition */
     .container {
       max-width: 500px;
       width: 92%;
       max-height: 85vh;
       overflow-y: auto;
       background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       padding: 24px;
       border-radius: 28px;
       box-shadow: var(--shadow);
       border: 1.5px solid var(--card-border);
       margin: auto 0;
       position: relative;
+      animation: viewEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
+
+    @keyframes viewEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(25px) scale(0.97);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Custom elegant scrollbar */
+    .container::-webkit-scrollbar { width: 6px; }
+    .container::-webkit-scrollbar-track { background: transparent; }
+    .container::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 10px; }
 
     h2 {
       font-size: 20px;
@@ -192,6 +226,7 @@
       text-align: center;
       margin-bottom: 18px;
       font-weight: 700;
+      animation: fadeIn 0.4s ease;
     }
 
     .user-profile-bar {
@@ -220,8 +255,9 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      transition: background-color 0.2s, transform 0.2s;
     }
-    .logout-btn:hover { background: #ef4444; color: #fff; }
+    .logout-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     
@@ -241,11 +277,16 @@
       text-align: center;
       cursor: pointer;
       box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     }
-    .tile:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
-    .tile:active { transform: scale(0.96); }
-    .tile .ico { font-size: 30px; color: var(--accent-gold); }
+    .tile:hover { 
+      transform: translateY(-5px) scale(1.02); 
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2); 
+      border-color: var(--accent-gold);
+    }
+    .tile:active { transform: scale(0.95); }
+    .tile .ico { font-size: 30px; color: var(--accent-gold); transition: transform 0.3s; }
+    .tile:hover .ico { transform: scale(1.15); }
     .tile.primary {
       background: linear-gradient(135deg, #f4c430 0%, #b45309 100%);
       color: #ffffff;
@@ -265,8 +306,13 @@
       font-weight: 600;
       background: var(--input-bg);
       color: var(--text-main);
+      transition: all 0.25s ease;
     }
-    input:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.2); }
+    input:focus { 
+      border-color: var(--accent-gold); 
+      box-shadow: 0 0 0 4px rgba(244, 196, 48, 0.2); 
+      transform: scale(1.01);
+    }
 
     .btn {
       display: block;
@@ -282,10 +328,12 @@
       cursor: pointer;
       text-align: center;
       box-shadow: 0 8px 20px rgba(212, 163, 115, 0.3);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, box-shadow 0.2s;
     }
-    .btn:hover { opacity: 0.95; }
-    .btn:active { transform: scale(0.98); }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(212, 163, 115, 0.4); opacity: 0.95; }
+    .btn:active { transform: scale(0.96); }
     .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); box-shadow: none; }
+    .btn.secondary:hover { border-color: var(--accent-gold); }
 
     .camera-wrapper {
       border: 2px solid var(--accent-gold);
@@ -298,12 +346,19 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
     #qr-reader { width: 100%; }
 
     .camera-status { color: var(--text-sub); font-size: 13px; text-align: center; font-weight: 600; }
 
-    .icon { font-size: 50px; margin-bottom: 8px; text-align: center; color: var(--accent-gold); }
+    .icon { font-size: 50px; margin-bottom: 8px; text-align: center; color: var(--accent-gold); animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes bounceIn {
+      0% { transform: scale(0); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
     .title { font-size: 20px; color: var(--text-main); font-weight: 700; margin-bottom: 12px; text-align: center; }
     .name {
       font-size: 22px; color: var(--accent-gold); font-weight: 700; margin-bottom: 12px;
@@ -316,7 +371,7 @@
 
     .spinner {
       width: 40px; height: 40px; border: 4px solid var(--chip-border); border-top-color: var(--accent-gold);
-      border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+      border-radius: 50%; animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite; margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -330,20 +385,30 @@
       border-radius: 30px;
       font-weight: 700;
       font-size: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
       cursor: pointer;
       border: none;
       display: flex;
       align-items: center;
       gap: 6px;
+      animation: slideUpHome 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.2s;
+    }
+    .home-btn:hover { transform: scale(1.06); }
+    .home-btn:active { transform: scale(0.94); }
+
+    @keyframes slideUpHome {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
     .suggestion-btn {
       display: flex; align-items: center; width: 100%; padding: 14px; margin: 8px 0;
       background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 14px;
       cursor: pointer; font-size: 15px; color: var(--text-main); font-weight: 600;
+      transition: all 0.2s ease;
     }
-    .suggestion-btn:hover { background: var(--chip-bg); }
+    .suggestion-btn:hover { background: var(--chip-bg); transform: translateX(-4px); border-color: var(--accent-gold); }
 
     .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
@@ -351,18 +416,22 @@
     .day-chip label {
       display: block; padding: 10px 4px; text-align: center; font-weight: 600; font-size: 12px;
       color: var(--text-main); background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 10px; cursor: pointer;
+      transition: all 0.2s;
     }
-    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); }
+    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); transform: scale(1.03); }
 
     .admin-item {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--input-bg); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; font-size: 13px;
+      animation: fadeIn 0.3s ease;
     }
-    .admin-del-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 4px 8px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .admin-del-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: none; padding: 4px 8px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: transform 0.2s; }
+    .admin-del-btn:hover { transform: scale(1.08); background: #ef4444; color: #fff; }
 
     #offlineOverlay {
       display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       background: #ef4444; color: #fff; padding: 10px 20px; border-radius: 30px; font-weight: 700; font-size: 13px; z-index: 99999;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
     }
   </style>
 </head>
@@ -384,7 +453,7 @@
 
   <button id="homeBtn" class="home-btn" style="display:none;" onclick="showView('dashboardView')"><i class="fa-solid fa-house"></i> الرئيسية</button>
 
-  <div class="container">
+  <div class="container" id="mainContainer">
 
     <div id="loader" class="loader-overlay">
       <div class="spinner"></div>
@@ -486,7 +555,7 @@
         <div id="adminsListContainer" style="margin-bottom:12px;"></div>
         
         <div style="background:var(--input-bg); padding:10px; border-radius:12px; border:1px dashed var(--card-border); margin-bottom:12px;">
-          <input type="text" id="newAdminEmail" placeholder="البريد الإلكتروني للخدادم الجديد" style="margin-bottom:8px;">
+          <input type="text" id="newAdminEmail" placeholder="البريد الإلكتروني للخادم الجديد" style="margin-bottom:8px;">
           <input type="text" id="newAdminNameInput" placeholder="اسم الخادم" style="margin-bottom:8px;">
           <button class="btn secondary" onclick="addNewAdmin()">➕ إضافة خادم جديد</button>
         </div>
@@ -649,7 +718,12 @@
       hideLoader();
       if (currentActiveViewId && currentActiveViewId !== viewId) resetView(currentActiveViewId);
 
-      // Reset settings lock states when navigating away from them
+      // Re-trigger modern view entrance animation by cloning or re-appending class
+      const container = document.getElementById("mainContainer");
+      container.style.animation = 'none';
+      container.offsetHeight; /* trigger reflow */
+      container.style.animation = 'viewEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+
       if (viewId !== 'adminSettingsView') {
         const lockEl = document.getElementById("adminSettingsLock");
         const formEl = document.getElementById("adminSettingsForm");
@@ -672,7 +746,6 @@
         if (el) el.style.display = (id === viewId) ? "block" : "none";
       });
 
-      // Show home button ONLY when NOT on dashboard or login view
       const homeBtn = document.getElementById("homeBtn");
       if (viewId === 'dashboardView' || viewId === 'loginView') {
         homeBtn.style.display = "none";
@@ -909,7 +982,7 @@
         if (res && res.status === "success" && Array.isArray(res.matches)) {
           res.matches.forEach(item => {
             var cardBox = document.createElement("div");
-            cardBox.style.cssText = "background:var(--input-bg); border:1px solid var(--card-border); padding:12px; border-radius:14px; margin-bottom:10px; text-align:center;";
+            cardBox.style.cssText = "background:var(--input-bg); border:1px solid var(--card-border); padding:12px; border-radius:14px; margin-bottom:10px; text-align:center; animation: fadeIn 0.3s ease;";
             let statusHtml = item.isNew ? "<span style='color:#f59e0b; font-weight:bold; font-size:12px;'>⚠️ لم يتم مشاركته من قبل</span><br>" : "<span style='color:#16a34a; font-weight:bold; font-size:12px;'>✅ تمت مشاركته مسبقاً</span><br>";
             cardBox.innerHTML = `<strong>👤 ${item.name}</strong><br>${statusHtml}`;
             
@@ -1069,7 +1142,6 @@
       if (!newPw) { showToast("⚠️ لم يتم إدخال كلمة مرور جديدة للحفظ", "info"); return; }
       showLoader("جاري الحفظ...");
       try {
-        // Dummy call to save new password via saveSettings with existing timing parameters
         const currentSet = await apiCall("get_settings");
         if (currentSet && currentSet.success) {
           var s = currentSet.settings;
