@@ -14,32 +14,32 @@
   <style>
     :root {
       --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
-      --app-bar-bg: #0d1b2a;
-      --card-bg: rgba(22, 36, 56, 0.85);
-      --card-border: #e0a96d;
+      --app-bar-bg: rgba(13, 27, 42, 0.9);
+      --card-bg: rgba(22, 36, 56, 0.75);
+      --card-border: rgba(224, 169, 109, 0.4);
       --text-main: #f1f5f9;
       --text-sub: #cbd5e1;
       --accent-gold: #f4c430;
       --accent-gold-hover: #d4a373;
-      --input-bg: rgba(13, 27, 42, 0.8);
-      --chip-bg: #1e293b;
-      --chip-border: #334155;
-      --shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      --input-bg: rgba(13, 27, 42, 0.6);
+      --chip-bg: rgba(30, 41, 59, 0.8);
+      --chip-border: rgba(51, 65, 85, 0.6);
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
 
     [data-theme="light"] {
-      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      --app-bar-bg: #1e293b;
-      --card-bg: rgba(255, 255, 255, 0.95);
-      --card-border: #d4a373;
+      --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      --app-bar-bg: rgba(255, 255, 255, 0.9);
+      --card-bg: rgba(255, 255, 255, 0.85);
+      --card-border: rgba(180, 83, 9, 0.3);
       --text-main: #0f172a;
       --text-sub: #475569;
       --accent-gold: #b45309;
       --accent-gold-hover: #92400e;
-      --input-bg: #ffffff;
-      --chip-bg: #f1f5f9;
+      --input-bg: rgba(248, 250, 252, 0.9);
+      --chip-bg: #f8fafc;
       --chip-border: #cbd5e1;
-      --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
     }
 
     * { 
@@ -47,6 +47,7 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 0;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     }
 
     body {
@@ -60,23 +61,25 @@
       align-items: center;
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
-      padding-top: 60px;
+      padding-top: 70px;
       padding-bottom: 20px;
     }
 
     .top-app-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 60px;
+      height: 64px;
       background: var(--app-bar-bg);
-      color: #ffffff;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
+      padding: 0 20px;
       z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      border-bottom: 1px solid rgba(244, 196, 48, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid var(--card-border);
     }
 
     .top-app-bar .brand {
@@ -89,26 +92,37 @@
     }
 
     .top-app-bar .brand img {
-      width: 34px; height: 34px;
-      border-radius: 8px;
+      width: 36px; height: 36px;
+      border-radius: 10px;
       object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
 
-    .theme-toggle-btn {
-      background: transparent;
-      border: 1px solid var(--accent-gold);
-      color: var(--accent-gold);
-      padding: 6px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s;
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
+
+    .icon-btn {
+      background: var(--chip-bg);
+      border: 1px solid var(--chip-border);
+      color: var(--accent-gold);
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .icon-btn:active { transform: scale(0.92); }
 
     .toast-container {
       position: fixed;
-      top: 70px; left: 50%;
+      top: 75px; left: 50%;
       transform: translateX(-50%);
       z-index: 9999;
       display: flex;
@@ -121,7 +135,7 @@
 
     .toast {
       padding: 12px 18px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 600;
       font-size: 14px;
       text-align: center;
@@ -129,11 +143,12 @@
       animation: fadeIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
       pointer-events: auto;
       color: #fff;
+      backdrop-filter: blur(8px);
     }
 
-    .toast.error { background: #ef4444; }
-    .toast.success { background: #16a34a; }
-    .toast.info { background: #2563eb; }
+    .toast.error { background: rgba(239, 68, 68, 0.9); }
+    .toast.success { background: rgba(22, 163, 74, 0.9); }
+    .toast.info { background: rgba(37, 99, 235, 0.9); }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
@@ -143,7 +158,7 @@
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(13, 27, 42, 0.85);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
       z-index: 500;
       border-radius: 24px;
       flex-direction: column;
@@ -157,14 +172,18 @@
       max-width: 500px;
       width: 92%;
       background: var(--card-bg);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       padding: 24px;
-      border-radius: 24px;
+      border-radius: 28px;
       box-shadow: var(--shadow);
       border: 1.5px solid var(--card-border);
       margin: auto 0;
       position: relative;
+      animation: zoomIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
+    @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
     h2 {
       font-size: 20px;
@@ -180,101 +199,111 @@
       justify-content: space-between;
       background: var(--input-bg);
       border: 1px dashed var(--accent-gold);
-      padding: 10px 14px;
-      border-radius: 16px;
-      margin-bottom: 18px;
+      padding: 12px 16px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
     }
 
-    .user-info { display: flex; align-items: center; gap: 10px; }
-    .user-avatar { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--accent-gold); }
+    .user-info { display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--accent-gold); object-fit: cover; }
     .user-details { display: flex; flex-direction: column; font-size: 13px; color: var(--text-main); }
-    .user-name { font-weight: 700; }
+    .user-name { font-weight: 700; font-size: 15px; color: var(--accent-gold); }
     .user-email { font-size: 11px; color: var(--text-sub); word-break: break-all; }
     
     .logout-btn {
-      background: #ef4444;
-      color: #fff;
-      border: none;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
       padding: 6px 12px;
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
+      transition: all 0.2s;
     }
+    .logout-btn:hover { background: #ef4444; color: #fff; }
 
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     
     .tile {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      min-height: 110px;
+      gap: 10px;
+      min-height: 120px;
       background: var(--input-bg);
       border: 1.5px solid var(--card-border);
-      border-radius: 18px;
+      border-radius: 20px;
       color: var(--text-main);
       font-weight: 700;
       font-size: 15px;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.15s, background 0.2s;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
     }
 
+    .tile:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); }
     .tile:active { transform: scale(0.96); }
-    .tile .ico { font-size: 32px; }
+    .tile .ico { font-size: 34px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
     .tile.primary {
-      background: linear-gradient(135deg, #d4a373 0%, #b45309 100%);
+      background: linear-gradient(135deg, #f4c430 0%, #b45309 100%);
       color: #ffffff;
       border: none;
+      box-shadow: 0 10px 25px rgba(180, 83, 9, 0.3);
     }
 
     input[type="text"], input[type="password"], input[type="time"], input[type="number"] {
       width: 100%;
-      padding: 12px 14px;
+      padding: 14px;
       font-size: 15px;
       border: 1.5px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       outline: none;
       text-align: center;
       margin-bottom: 12px;
       font-weight: 600;
       background: var(--input-bg);
       color: var(--text-main);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
     }
+    input:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.2); }
 
     .btn {
       display: block;
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       margin-top: 10px;
       font-size: 15px;
       font-weight: 700;
       background: linear-gradient(135deg, #f4c430 0%, #d4a373 100%);
       color: #0d1b2a;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
       text-align: center;
-      transition: opacity 0.2s;
+      box-shadow: 0 8px 20px rgba(212, 163, 115, 0.3);
+      transition: opacity 0.2s, transform 0.15s;
     }
-
-    .btn:hover { opacity: 0.9; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); }
+    .btn:hover { opacity: 0.95; transform: translateY(-1px); }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn.secondary { background: var(--chip-bg); color: var(--text-main); border: 1px solid var(--chip-border); box-shadow: none; }
 
     .camera-wrapper {
       border: 2px solid var(--accent-gold);
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
       background: #000;
       position: relative;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       min-height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
     }
     #qr-reader { width: 100%; }
 
@@ -293,21 +322,22 @@
       font-weight: 700;
       margin-bottom: 12px;
       background: var(--input-bg);
-      padding: 12px;
-      border-radius: 14px;
+      padding: 14px;
+      border-radius: 16px;
       border: 1px dashed var(--accent-gold);
       text-align: center;
     }
     .status-tag {
       font-size: 14px;
-      padding: 10px;
-      border-radius: 10px;
+      padding: 12px;
+      border-radius: 12px;
       display: block;
       font-weight: 600;
       background: var(--chip-bg);
       color: var(--text-main);
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      border: 1px solid var(--chip-border);
     }
 
     .spinner {
@@ -320,52 +350,37 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .home-btn {
-      position: fixed;
-      bottom: 20px; left: 20px;
-      z-index: 999;
-      background: var(--accent-gold);
-      color: #0d1b2a;
-      padding: 10px 18px;
-      border-radius: 30px;
-      font-weight: 700;
-      font-size: 14px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-      cursor: pointer;
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
     .suggestion-btn {
       display: flex;
       align-items: center;
       width: 100%;
-      padding: 12px;
-      margin: 6px 0;
+      padding: 14px;
+      margin: 8px 0;
       background: var(--input-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
       font-size: 15px;
       color: var(--text-main);
       font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: background 0.2s, transform 0.15s;
     }
+    .suggestion-btn:hover { background: var(--chip-bg); transform: translateY(-2px); }
 
     .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
     .day-chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
     .day-chip label {
       display: block;
-      padding: 8px 4px;
+      padding: 10px 4px;
       text-align: center;
       font-weight: 600;
       font-size: 12px;
       color: var(--text-main);
       background: var(--chip-bg);
       border: 1px solid var(--chip-border);
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
     }
     .day-chip input:checked + label {
@@ -373,21 +388,61 @@
       color: #0d1b2a;
       border-color: var(--accent-gold);
     }
+
+    /* Admin Management list */
+    .admin-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      padding: 10px 14px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .admin-del-btn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    /* Offline Warning Overlay */
+    #offlineOverlay {
+      display: none;
+      position: fixed;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #ef4444;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 13px;
+      z-index: 99999;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+    }
   </style>
 </head>
 <body data-theme="dark">
 
   <div id="toastContainer" class="toast-container"></div>
+  <div id="offlineOverlay">⚠️ لا توجد اتصال بالإنترنت، يرجى التحقق من الشبكة</div>
 
   <header class="top-app-bar">
     <div class="brand">
       <img src="new-icon-512.png" alt="App Icon">
       <span>Lambas Bible</span>
     </div>
-    <button class="theme-toggle-btn" onclick="toggleTheme()">☀️ الوضع المضيء</button>
+    <div class="top-actions">
+      <button class="icon-btn" id="themeToggleBtn" onclick="cycleTheme()" title="تغيير الثيم">🌙</button>
+      <button class="icon-btn" onclick="openSettingsView()" title="إعدادات النظام">⚙️</button>
+    </div>
   </header>
-
-  <button id="homeBtn" class="home-btn" style="display:none;" onclick="showView('dashboardView')">🏠 الرئيسية</button>
 
   <div class="container">
 
@@ -430,10 +485,10 @@
       <div class="grid">
         <button class="tile primary" onclick="showView('scanView')"><span class="ico">📷</span>مسح QR</button>
         <button class="tile" onclick="showView('searchView')"><span class="ico">🔍</span>تحضير بالاسم</button>
-        <button class="tile" onclick="openDrive()"><span class="ico">📁</span>فولدر Google Drive</button>
+        <button class="tile" onclick="showView('cardShareView')"><span class="ico">📤</span>مشاركة كارت QR</button>
         <button class="tile" onclick="openSheet()"><span class="ico">📊</span>فتح الشيت</button>
         <button class="tile" onclick="showView('addView')"><span class="ico">➕</span>إضافة مخدوم جديد</button>
-        <button class="tile" onclick="showView('settingsView')"><span class="ico">⚙️</span>الإعدادات</button>
+        <button class="tile" onclick="openSettingsView()"><span class="ico">⚙️</span>الإعدادات</button>
       </div>
     </div>
 
@@ -455,6 +510,14 @@
       <div id="searchResults" style="margin-top:15px;"></div>
     </div>
 
+    <!-- 3.5 Card Share View (Replacing Drive Folder) -->
+    <div id="cardShareView" style="display:none;">
+      <h2>📤 بحث ومشاركة كارت المخدوم</h2>
+      <input type="text" id="shareNameInput" placeholder="اكتب اسم المخدوم للبحث عن الكارت..." autocomplete="off">
+      <button class="btn" onclick="executeCardSearch()">بحث عن الكارت</button>
+      <div id="shareResults" style="margin-top:15px;"></div>
+    </div>
+
     <!-- 4. Add Student View -->
     <div id="addView" style="display:none;">
       <h2>➕ إضافة مخدوم جديد</h2>
@@ -472,14 +535,14 @@
       </div>
 
       <div id="settingsForm" style="display:none;">
-        <label style="font-weight:bold; font-size:12px;">موعد بدء الاجتماع</label>
+        <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">موعد بدء الاجتماع</label>
         <input type="time" id="cfgStartTime">
-        <label style="font-weight:bold; font-size:12px;">موعد نهاية الاجتماع</label>
+        <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">موعد نهاية الاجتماع</label>
         <input type="time" id="cfgEndTime">
-        <label style="font-weight:bold; font-size:12px;">مدة السماح بالتأخير (دقائق)</label>
+        <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">مدة السماح بالتأخير (دقائق)</label>
         <input type="number" id="cfgAcceptedDelay">
 
-        <label style="font-weight:bold; font-size:12px;">الأيام المسموحة</label>
+        <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">الأيام المسموحة</label>
         <div class="days-grid">
           <div class="day-chip"><input type="checkbox" id="day0" value="0"><label for="day0">الأحد</label></div>
           <div class="day-chip"><input type="checkbox" id="day1" value="1"><label for="day1">الاثنين</label></div>
@@ -490,8 +553,19 @@
           <div class="day-chip"><input type="checkbox" id="day6" value="6"><label for="day6">السبت</label></div>
         </div>
 
-        <label style="font-weight:bold; font-size:12px;">كلمة مرور جديدة (اختياري)</label>
+        <label style="font-weight:bold; font-size:12px; display:block; margin-bottom:6px;">كلمة مرور جديدة (اختياري)</label>
         <input type="password" id="cfgNewPassword" placeholder="اتركها فارغة للإبقاء على الحالية">
+
+        <hr style="border:0; border-top:1px solid var(--card-border); margin:16px 0;">
+
+        <h3 style="font-size:15px; color:var(--accent-gold); margin-bottom:10px;">👥 إدارة الخدام والمسؤولين</h3>
+        <div id="adminsListContainer" style="margin-bottom:12px;"></div>
+        
+        <div style="background:var(--input-bg); padding:10px; border-radius:12px; border:1px dashed var(--card-border); margin-bottom:12px;">
+          <input type="text" id="newAdminEmail" placeholder="البريد الإلكتروني للخدادم الجديد" style="margin-bottom:8px;">
+          <input type="text" id="newAdminName" placeholder="اسم الخادم في الشيت" style="margin-bottom:8px;">
+          <button class="btn secondary" onclick="addNewAdmin()">➕ إضافة خادم جديد</button>
+        </div>
 
         <button class="btn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
       </div>
@@ -511,7 +585,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbyPnUu7R0VaCrwyEYYW_YvyVI0q4g96OZLC9z5-MwTuL8Scw-0xa-_6-SfqCjgWw7KT/exec";
     const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1jqkN7v_0Uk3m3p_gfoXRdF4Q1c9XDXank1fnVmsm7jU/edit?usp=sharing";
-    const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1D5ElLa8-fNzShWqwgwcKQMC11XtfkE2z?usp=drive_link";
 
     var currentUser = null;
     var html5QrCode = null;
@@ -519,52 +592,45 @@
     var isProcessingScan = false;
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
+    var currentThemeMode = localStorage.getItem("app_theme") || "device";
 
-    // Request Management Queue (Prevents app freeze on concurrent / repeated requests)
+    // Request Management Queue
     class RequestQueueManager {
       constructor() {
         this.queue = [];
         this.isProcessing = false;
       }
-
       enqueue(action, payload, resolve, reject) {
         this.queue.push({ action, payload, resolve, reject, retries: 0 });
         this.processQueue();
       }
-
       async processQueue() {
         if (this.isProcessing || this.queue.length === 0) return;
         this.isProcessing = true;
-
         const req = this.queue.shift();
-
         try {
           const result = await this.executeFetch(req.action, req.payload);
           req.resolve(result);
         } catch (error) {
           if (req.retries < 2) {
             req.retries++;
-            this.queue.unshift(req); // Re-queue request for retry
+            this.queue.unshift(req);
             await new Promise(r => setTimeout(r, 600));
           } else {
             req.reject(error);
           }
         } finally {
           this.isProcessing = false;
-          setTimeout(() => this.processQueue(), 50); // Fluid throttle between consecutive execution
+          setTimeout(() => this.processQueue(), 50);
         }
       }
-
       async executeFetch(action, payload) {
         payload.action = action;
         payload.requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-        if (currentUser && currentUser.email) {
-          payload.email = currentUser.email;
-        }
+        if (currentUser && currentUser.email) payload.email = currentUser.email;
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout protect
-
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         try {
           const res = await fetch(API_URL, {
             method: "POST",
@@ -593,20 +659,15 @@
     function extractId(text) {
       if (!text) return "";
       text = String(text).trim();
-
-      // Direct ID string format standard
       if (/^[A-Za-z0-9_-]+$/.test(text) && !text.includes("http") && !text.includes("{")) {
         return text;
       }
-
       var m = text.match(/[?&]id=([^&#]+)/);
       if (m && m[1]) return decodeURIComponent(m[1]).trim();
-
       try {
         var parsed = JSON.parse(text);
         if (parsed && parsed.id) return String(parsed.id).trim();
       } catch(e) {}
-
       return text;
     }
 
@@ -619,61 +680,59 @@
       setTimeout(() => { toast.remove(); }, 3000);
     }
 
-    function parseJwt(token) {
-      try {
-        var base64Url = token.split('.')[1];
-        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        return JSON.parse(jsonPayload);
-      } catch(e) {
-        return null;
-      }
-    }
-
-    function toggleTheme() {
+    // Theme Engine (3 modes: dark, light, device)
+    function applyTheme(mode) {
+      currentThemeMode = mode;
+      localStorage.setItem("app_theme", mode);
       const body = document.body;
-      const themeBtn = document.querySelector('.theme-toggle-btn');
-      if (body.getAttribute('data-theme') === 'dark') {
-        body.setAttribute('data-theme', 'light');
-        themeBtn.innerText = '🌙 الوضع الداكن';
-      } else {
-        body.setAttribute('data-theme', 'dark');
-        themeBtn.innerText = '☀️ الوضع المضيء';
+      const btn = document.getElementById("themeToggleBtn");
+
+      let effectiveTheme = mode;
+      if (mode === "device") {
+        effectiveTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
       }
+
+      body.setAttribute("data-theme", effectiveTheme);
+      if (mode === "dark") btn.innerHTML = "🌙";
+      else if (mode === "light") btn.innerHTML = "☀️";
+      else btn.innerHTML = "💻";
     }
 
-    function resetView(viewId) {
-      switch (viewId) {
-        case 'searchView':
-          var searchInput = document.getElementById('searchNameInput');
-          var searchResults = document.getElementById('searchResults');
-          if (searchInput) searchInput.value = '';
-          if (searchResults) searchResults.innerHTML = '';
-          break;
-        case 'scanView':
-          stopLiveScanner();
-          break;
-        case 'addView':
-          var nameInput = document.getElementById('newStudentName');
-          var addResult = document.getElementById('addResult');
-          if (nameInput) nameInput.value = '';
-          if (addResult) addResult.innerHTML = '';
-          break;
-      }
+    function cycleTheme() {
+      if (currentThemeMode === "dark") applyTheme("light");
+      else if (currentThemeMode === "light") applyTheme("device");
+      else applyTheme("dark");
     }
 
-    function showView(viewId) {
+    window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+      if (currentThemeMode === "device") applyTheme("device");
+    });
+
+    // History & Navigation Handling
+    function showView(viewId, pushHistory = true) {
       hideLoader();
       if (currentActiveViewId && currentActiveViewId !== viewId) {
         resetView(currentActiveViewId);
       }
 
-      ["loginView", "dashboardView", "scanView", "searchView", "addView", "settingsView", "resultView"].forEach(function(id) {
+      if (viewId === 'dashboardView' || viewId === 'loginView') {
+        verifiedPassword = "";
+        const lockEl = document.getElementById("settingsLock");
+        const formEl = document.getElementById("settingsForm");
+        if (lockEl) lockEl.style.display = "block";
+        if (formEl) formEl.style.display = "none";
+        const pwInput = document.getElementById("gatePassword");
+        if (pwInput) pwInput.value = "";
+      }
+
+      ["loginView", "dashboardView", "scanView", "searchView", "cardShareView", "addView", "settingsView", "resultView"].forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.style.display = (id === viewId) ? "block" : "none";
       });
+
+      if (pushHistory && currentActiveViewId !== viewId && viewId !== 'loginView') {
+        history.pushState({ view: viewId }, '', '');
+      }
 
       currentActiveViewId = viewId;
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -684,7 +743,43 @@
       }
     }
 
+    window.addEventListener('popstate', function(e) {
+      if (e.state && e.state.view) {
+        showView(e.state.view, false);
+      } else {
+        showView(currentUser ? 'dashboardView' : 'loginView', false);
+      }
+    });
+
+    function resetView(viewId) {
+      if (viewId === 'searchView') {
+        document.getElementById('searchNameInput').value = '';
+        document.getElementById('searchResults').innerHTML = '';
+      } else if (viewId === 'scanView') {
+        stopLiveScanner();
+      } else if (viewId === 'addView') {
+        document.getElementById('newStudentName').value = '';
+        document.getElementById('addResult').innerHTML = '';
+      } else if (viewId === 'cardShareView') {
+        document.getElementById('shareNameInput').value = '';
+        document.getElementById('shareResults').innerHTML = '';
+      }
+    }
+
+    function openSettingsView() {
+      showView('settingsView');
+    }
+
+    // Network Status monitoring
+    window.addEventListener('online', () => document.getElementById("offlineOverlay").style.display = "none");
+    window.addEventListener('offline', () => document.getElementById("offlineOverlay").style.display = "block");
+
     window.addEventListener("DOMContentLoaded", async function() {
+      applyTheme(currentThemeMode);
+      if (!navigator.onLine) {
+        document.getElementById("offlineOverlay").style.display = "block";
+      }
+
       const savedUser = localStorage.getItem("app_user");
       if (savedUser) {
         try {
@@ -693,6 +788,7 @@
           const authRes = await apiCall("check_auth", { email: currentUser.email });
           hideLoader();
           if (authRes && authRes.authorized) {
+            if (authRes.adminName) currentUser.name = authRes.adminName;
             setupUserProfileUI();
             checkDirectUrlScan();
           } else {
@@ -703,7 +799,7 @@
           logoutUser();
         }
       } else {
-        showView('loginView');
+        showView('loginView', false);
       }
     });
 
@@ -722,7 +818,7 @@
         if (authRes && authRes.authorized) {
           currentUser = {
             email: payload.email.toLowerCase().trim(),
-            name: payload.name || payload.email,
+            name: authRes.adminName || payload.name || payload.email,
             picture: payload.picture || "https://lh3.googleusercontent.com/a/default-user"
           };
           localStorage.setItem("app_user", JSON.stringify(currentUser));
@@ -742,7 +838,6 @@
       document.getElementById("uName").innerText = currentUser.name;
       document.getElementById("uEmail").innerText = currentUser.email;
       document.getElementById("uAvatar").src = currentUser.picture;
-      document.getElementById("homeBtn").style.display = "flex";
       showView('dashboardView');
     }
 
@@ -751,36 +846,39 @@
       currentUser = null;
       verifiedPassword = "";
       stopLiveScanner();
-      document.getElementById("homeBtn").style.display = "none";
       if (msg) showLoginError(msg);
-      showView('loginView');
+      showView('loginView', false);
     }
 
     function showLoginError(msg) {
       var errDiv = document.getElementById("loginError");
       errDiv.innerText = msg;
       errDiv.style.display = "block";
-      showView('loginView');
+      showView('loginView', false);
     }
 
     function checkDirectUrlScan() {
       var urlParams = new URLSearchParams(window.location.search);
       var scannedId = urlParams.get("id");
-      if (scannedId) {
-        processScannedText(scannedId);
-      }
+      if (scannedId) processScannedText(scannedId);
     }
 
     function openSheet() { window.open(GOOGLE_SHEET_URL, "_blank"); }
-    function openDrive() { window.open(DRIVE_FOLDER_URL, "_blank"); }
 
     function showLoader(text) {
       document.getElementById("loaderText").innerText = text || "جاري التحميل...";
       document.getElementById("loader").style.display = "flex";
     }
 
-    function hideLoader() {
-      document.getElementById("loader").style.display = "none";
+    function hideLoader() { document.getElementById("loader").style.display = "none"; }
+
+    function parseJwt(token) {
+      try {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) { return null; }
     }
 
     function renderResult(r) {
@@ -798,17 +896,14 @@
       showView("resultView");
     }
 
+    // Camera scanner
     function startLiveScanner() {
       if (isScannerRunning) return;
       document.getElementById("cameraStatus").innerText = "🎥 جاري تشغيل الكاميرا المباشرة...";
-      
       const config = { fps: 10, qrbox: { width: 220, height: 220 } };
 
       try {
-        if (!html5QrCode) {
-          html5QrCode = new Html5Qrcode("qr-reader");
-        }
-        
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader");
         html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError)
           .then(() => {
             isScannerRunning = true;
@@ -820,52 +915,42 @@
                 isScannerRunning = true;
                 document.getElementById("cameraStatus").innerText = "📸 الكاميرا تعمل الآن";
               })
-              .catch((err) => {
+              .catch(() => {
                 isScannerRunning = false;
                 document.getElementById("cameraStatus").innerText = "❌ تعذر فتح الكاميرا: تأكد من منح الصلاحيات";
               });
           });
       } catch (err) {
         isScannerRunning = false;
-        document.getElementById("cameraStatus").innerText = "❌ خطأ في البدء، اضغط إعادة تشغيل الكاميرا";
+        document.getElementById("cameraStatus").innerText = "❌ خطأ في البدء";
       }
     }
 
     function stopLiveScanner() {
       if (html5QrCode && isScannerRunning) {
-        return html5QrCode.stop().then(() => {
-          isScannerRunning = false;
-        }).catch(err => {
-          isScannerRunning = false;
-        });
+        return html5QrCode.stop().then(() => { isScannerRunning = false; }).catch(() => { isScannerRunning = false; });
       }
       return Promise.resolve();
     }
 
     function restartScanner() {
       isProcessingScan = false;
-      stopLiveScanner().then(() => {
-        setTimeout(startLiveScanner, 200);
-      });
+      stopLiveScanner().then(() => { setTimeout(startLiveScanner, 200); });
     }
 
-    function onScanSuccess(decodedText) {
+    function onScanSuccess(text) {
       if (isProcessingScan) return;
       isProcessingScan = true;
-
       stopLiveScanner().then(() => {
-        processScannedText(decodedText).finally(() => {
-          isProcessingScan = false;
-        });
+        processScannedText(text).finally(() => { isProcessingScan = false; });
       });
     }
-
-    function onScanError(errorMessage) {}
+    function onScanError(err) {}
 
     async function processScannedText(text) {
       var id = extractId(text);
       if (!id) {
-        renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تأكد من مسح كارت كود صحيح" });
+        renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تأكد من مسح كارت صحيح" });
         return;
       }
       showLoader("جاري تسجيل الحضور...");
@@ -875,19 +960,14 @@
         renderResult(res);
       } catch (e) {
         hideLoader();
-        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "فشل الاتصال الخاطف بالسيرفر" });
+        renderResult({ kind: "error", icon: "❌", title: "خطأ بالاتصال", message: "فشل الاتصال بالسيرفر" });
       }
     }
 
     async function processDirectAttendance(rawId) {
-      var cleanId = extractId(rawId);
-      if (!cleanId) {
-        renderResult({ kind: "error", icon: "⚠️", title: "كود غير صالح", message: "تعذر الحصول على معرف المخدوم" });
-        return;
-      }
       showLoader("جاري تسجيل الحضور...");
       try {
-        const res = await apiCall("scan", { id: cleanId, email: currentUser ? currentUser.email : "" });
+        const res = await apiCall("scan", { id: rawId, email: currentUser ? currentUser.email : "" });
         hideLoader();
         renderResult(res);
       } catch (e) {
@@ -897,62 +977,123 @@
     }
 
     async function executeSearch() {
-      var searchBtn = document.getElementById("btnSearch");
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
-      
-      if (!name) { 
-        showToast("⚠️ يرجى إدخال اسم للبحث", "error");
-        return; 
-      }
+      if (!name) { showToast("⚠️ يرجى إدخال اسم للبحث", "error"); return; }
 
-      searchBtn.disabled = true;
       resDiv.innerHTML = "<div style='text-align:center; padding:10px;'><div class='spinner' style='width:25px;height:25px;'></div>جاري البحث...</div>";
-      
       try {
         const res = await apiCall("search", { name: name });
         resDiv.innerHTML = "";
-        searchBtn.disabled = false;
-
         if (res && res.status === "exact_match") {
           processDirectAttendance(res.id);
         } else if (res && res.status === "suggestions" && Array.isArray(res.matches)) {
           resDiv.innerHTML = "<div style='font-weight:bold; color:var(--accent-gold); margin-bottom:8px;'>💡 النتائج المقترحة:</div>";
-          res.matches.forEach(function(item) {
+          res.matches.forEach(item => {
             var btn = document.createElement("button");
             btn.className = "suggestion-btn";
             btn.innerText = "👤 " + item.name;
-            btn.onclick = function() { processDirectAttendance(item.id); };
+            btn.onclick = () => processDirectAttendance(item.id);
             resDiv.appendChild(btn);
           });
         } else {
           showToast("❌ لم نجد نتائج مطابقة", "error");
         }
       } catch (err) {
-        searchBtn.disabled = false;
         resDiv.innerHTML = "";
         showToast("❌ حدث خطأ أثناء البحث", "error");
       }
     }
 
-    async function submitNewStudent() {
-      var addBtn = document.getElementById("btnAddStudent");
-      var nameInput = document.getElementById("newStudentName");
-      var name = nameInput.value.trim();
-      
-      if (!name) { 
-        showToast("يرجى كتابة اسم المخدوم", "error"); 
-        return; 
-      }
+    // Card Share Search & PWA Web Share API
+    async function executeCardSearch() {
+      var name = document.getElementById("shareNameInput").value.trim();
+      var resDiv = document.getElementById("shareResults");
+      if (!name) { showToast("⚠️ يرجى إدخال اسم المخدوم", "error"); return; }
 
-      addBtn.disabled = true;
+      resDiv.innerHTML = "<div style='text-align:center; padding:10px;'><div class='spinner' style='width:25px;height:25px;'></div>جاري البحث عن الكارت...</div>";
+      try {
+        const res = await apiCall("search_card_share", { name: name });
+        resDiv.innerHTML = "";
+        if (res && res.status === "success" && Array.isArray(res.matches)) {
+          res.matches.forEach(item => {
+            var cardBox = document.createElement("div");
+            cardBox.style.cssText = "background:var(--input-bg); border:1px solid var(--card-border); padding:12px; border-radius:14px; margin-bottom:10px; text-align:center;";
+            
+            let statusHtml = item.isNew 
+              ? "<span style='color:#f59e0b; font-weight:bold; font-size:12px;'>⚠️ لم يتم مشاركته من قبل (في مجلد الجلسة الجديدة)</span><br>"
+              : "<span style='color:#16a34a; font-weight:bold; font-size:12px;'>✅ تمت مشاركته مسبقاً (في المجلد الرئيسي)</span><br>";
+
+            cardBox.innerHTML = `<strong>👤 ${item.name}</strong><br>${statusHtml}`;
+            
+            var shareBtn = document.createElement("button");
+            shareBtn.className = "btn";
+            shareBtn.innerText = "📤 مشاركة كارت QR كصورة";
+            shareBtn.onclick = () => shareCardImage(item.fileId, item.driveUrl, item.name);
+            cardBox.appendChild(shareBtn);
+            resDiv.appendChild(cardBox);
+          });
+        } else {
+          showToast("❌ لم يتم العثور على كارت لهذا الاسم", "error");
+        }
+      } catch(e) {
+        resDiv.innerHTML = "";
+        showToast("❌ حدث خطأ أثناء البحث", "error");
+      }
+    }
+
+    async function shareCardImage(fileId, driveUrl, studentName) {
+      showLoader("جاري تجهيز الصورة للمشاركة...");
+      try {
+        // Fetch image blob
+        let fetchUrl = driveUrl;
+        if (driveUrl.includes("drive.google.com")) {
+          // Convert view link to export/download link if needed or fetch via proxy/cors
+          let matchId = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+          if (matchId && matchId[1]) {
+            fetchUrl = "https://lh3.googleusercontent.com/d/" + matchId[1];
+          }
+        }
+
+        const response = await fetch(fetchUrl);
+        const blob = await response.blob();
+        const file = new File([blob], studentName + "_card.png", { type: "image/png" });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: "كارت QR المخدوم: " + studentName,
+            text: "كارت حضور الكنيسة الخاص بـ " + studentName,
+            files: [file]
+          });
+        } else {
+          // Fallback download
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = studentName + "_card.png";
+          a.click();
+          showToast("💾 تم تحميل الصورة على جهازك", "success");
+        }
+
+        // Notify backend to move file from New folder to Main folder
+        await apiCall("share_move_card", { fileId: fileId });
+        hideLoader();
+        showToast("✅ تمت العملية بنجاح ونقل الكارت للمجلد الرئيسي", "success");
+        executeCardSearch();
+      } catch (e) {
+        hideLoader();
+        showToast("⚠️ تعذر مشاركة الملف تلقائياً، جاري التحميل اليدوي...", "info");
+        window.open(driveUrl, '_blank');
+      }
+    }
+
+    async function submitNewStudent() {
+      var name = document.getElementById("newStudentName").value.trim();
+      if (!name) { showToast("يرجى كتابة اسم المخدوم", "error"); return; }
+
       showLoader("جاري التسجيل وإنشاء الكارت...");
-      
       try {
         const res = await apiCall("add_student", { name: name, email: currentUser ? currentUser.email : "" });
         hideLoader();
-        addBtn.disabled = false;
-
         if (res && res.success) {
           showToast("🎉 تم إنشاء المخدوم بنجاح!", "success");
           var html = "<p style='color:#16a34a; font-weight:bold;'>🎉 تم إنشاء المخدوم بنجاح!</p>";
@@ -960,49 +1101,42 @@
             html += "<a href='" + res.driveUrl + "' target='_blank' class='btn' style='margin-top:10px;'>📁 فتح الكارت في Google Drive</a>";
           }
           document.getElementById("addResult").innerHTML = html;
-          nameInput.value = "";
+          document.getElementById("newStudentName").value = "";
         } else {
-          showToast("فشل الإضافة: " + ((res && res.message) ? res.message : "تعذر الإضافة بسبب الضغط الحالى"), "error");
+          showToast("فشل الإضافة: " + (res.message || ""), "error");
         }
       } catch (e) {
         hideLoader();
-        addBtn.disabled = false;
         showToast("حدث خطأ بالاتصال بالسيرفر", "error");
       }
     }
 
+    // Settings & Admins
     async function unlockSettings() {
-      var pwInput = document.getElementById("gatePassword");
-      var pw = pwInput ? pwInput.value.trim() : "";
-      if (!pw) {
-        showToast("يرجى إدخال كلمة المرور", "error");
-        return;
-      }
+      var pw = document.getElementById("gatePassword").value.trim();
+      if (!pw) { showToast("يرجى إدخال كلمة المرور", "error"); return; }
       showLoader("جاري التحقق...");
       try {
         const res = await apiCall("verify_settings_password", { password: pw });
         hideLoader();
-
         if (res && res.valid) {
-          verifiedPassword = String(pw).trim();
+          verifiedPassword = pw;
           document.getElementById("settingsLock").style.display = "none";
           document.getElementById("settingsForm").style.display = "block";
           loadSettingsData();
+          loadAdminsData();
         } else {
           showToast("❌ كلمة المرور غير صحيحة", "error");
         }
       } catch(e) {
         hideLoader();
-        showToast("خطأ في التحقق من كلمة المرور", "error");
+        showToast("خطأ في التحقق", "error");
       }
     }
 
     async function loadSettingsData() {
-      showLoader("جاري تحميل الإعدادات...");
       try {
         const res = await apiCall("get_settings");
-        hideLoader();
-
         if (res && res.success) {
           var s = res.settings;
           document.getElementById("cfgStartTime").value = s.startTime;
@@ -1013,8 +1147,75 @@
             document.getElementById("day" + d).checked = days.includes(d);
           }
         }
+      } catch(e) {}
+    }
+
+    async function loadAdminsData() {
+      try {
+        const res = await apiCall("get_admins");
+        if (res && res.success) {
+          const container = document.getElementById("adminsListContainer");
+          container.innerHTML = "";
+          res.admins.forEach(admin => {
+            var div = document.createElement("div");
+            div.className = "admin-item";
+            div.innerHTML = `<div><strong>${admin.name}</strong><br><span style="font-size:11px;color:var(--text-sub);">${admin.email}</span></div>`;
+            if (!admin.isOwner) {
+              var delBtn = document.createElement("button");
+              delBtn.className = "admin-del-btn";
+              delBtn.innerText = "حذف";
+              delBtn.onclick = () => deleteAdmin(admin.email);
+              div.appendChild(delBtn);
+            } else {
+              var tag = document.createElement("span");
+              tag.style.cssText = "font-size:11px; color:var(--accent-gold); font-weight:bold;";
+              tag.innerText = "المالك";
+              div.appendChild(tag);
+            }
+            container.appendChild(div);
+          });
+        }
+      } catch(e) {}
+    }
+
+    async function addNewAdmin() {
+      var email = document.getElementById("newAdminEmail").value.trim();
+      var name = document.getElementById("newAdminName").value.trim();
+      if (!email) { showToast("يرجى إدخال البريد الإلكتروني", "error"); return; }
+
+      showLoader("جاري إضافة الخادم...");
+      try {
+        const res = await apiCall("add_admin", { email: email, name: name, password: verifiedPassword });
+        hideLoader();
+        if (res && res.success) {
+          showToast(res.message, "success");
+          document.getElementById("newAdminEmail").value = "";
+          document.getElementById("newAdminName").value = "";
+          loadAdminsData();
+        } else {
+          showToast(res.message || "فشل الإضافة", "error");
+        }
       } catch(e) {
         hideLoader();
+        showToast("خطأ في الاتصال", "error");
+      }
+    }
+
+    async function deleteAdmin(email) {
+      if (!confirm("هل أنت متأكد من حذف هذا الخادم؟")) return;
+      showLoader("جاري حذف الخادم...");
+      try {
+        const res = await apiCall("delete_admin", { email: email, password: verifiedPassword });
+        hideLoader();
+        if (res && res.success) {
+          showToast(res.message, "success");
+          loadAdminsData();
+        } else {
+          showToast(res.message || "فشل الحذف", "error");
+        }
+      } catch(e) {
+        hideLoader();
+        showToast("خطأ في الاتصال", "error");
       }
     }
 
@@ -1035,16 +1236,13 @@
           allowedDays: allowedDays
         });
         hideLoader();
-
         if (res && res.success) {
           showToast(res.message, "success");
           var newPw = document.getElementById("cfgNewPassword").value;
-          if (newPw && newPw.trim() !== "") {
-            verifiedPassword = String(newPw).trim();
-          }
+          if (newPw && newPw.trim() !== "") verifiedPassword = newPw.trim();
           document.getElementById("cfgNewPassword").value = "";
         } else {
-          showToast((res && res.message) ? res.message : "فشل حفظ الإعدادات", "error");
+          showToast(res.message || "فشل حفظ الإعدادات", "error");
         }
       } catch(e) {
         hideLoader();
