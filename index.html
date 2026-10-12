@@ -69,7 +69,6 @@
       padding-bottom: 20px;
     }
 
-    /* Top Bar with Glass Effect */
     .top-app-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -85,10 +84,10 @@
       z-index: 1000;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       border-bottom: 1px solid var(--card-border);
-      animation: powerPointSlideDown 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      animation: mediumSlideDown 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
 
-    @keyframes powerPointSlideDown {
+    @keyframes mediumSlideDown {
       0% { transform: translateY(-100%); opacity: 0; }
       100% { transform: translateY(0); opacity: 1; }
     }
@@ -115,7 +114,6 @@
       gap: 10px;
     }
 
-    /* Glass Icon Buttons */
     .icon-btn {
       background: var(--chip-bg);
       backdrop-filter: blur(12px);
@@ -130,7 +128,7 @@
       cursor: pointer;
       font-size: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .icon-btn:hover { transform: scale(1.12); filter: brightness(1.2); }
     .icon-btn:active { transform: scale(0.90); }
@@ -155,7 +153,7 @@
       font-size: 14px;
       text-align: center;
       box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-      animation: powerPointZoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.5s ease-in 3.2s forwards;
+      animation: mediumZoomIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.3s ease-in 2.8s forwards;
       pointer-events: auto;
       color: #fff;
       backdrop-filter: blur(12px);
@@ -164,16 +162,15 @@
     .toast.success { background: rgba(22, 163, 74, 0.9); border: 1px solid rgba(22, 163, 74, 0.4); }
     .toast.info { background: rgba(37, 99, 235, 0.9); border: 1px solid rgba(37, 99, 235, 0.4); }
 
-    @keyframes powerPointZoomIn {
-      0% { opacity: 0; transform: scale(0.6) translateY(-25px); }
+    @keyframes mediumZoomIn {
+      0% { opacity: 0; transform: scale(0.7) translateY(-15px); }
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     @keyframes fadeOut {
       0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.9) translateY(-15px); }
+      100% { opacity: 0; transform: scale(0.9) translateY(-10px); }
     }
 
-    /* Advanced Tech Loader Animation */
     .loader-overlay {
       display: none;
       position: absolute;
@@ -187,14 +184,14 @@
       align-items: center;
       color: var(--accent-gold);
       font-weight: 700;
-      animation: fadeIn 0.4s ease;
+      animation: fadeIn 0.25s ease;
     }
 
     .tech-loader {
       position: relative;
-      width: 60px;
-      height: 60px;
-      margin-bottom: 16px;
+      width: 50px;
+      height: 50px;
+      margin-bottom: 14px;
     }
     .tech-loader div {
       box-sizing: border-box;
@@ -204,14 +201,14 @@
       border: 4px solid transparent;
       border-top-color: var(--accent-gold);
       border-radius: 50%;
-      animation: techSpin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      animation: techSpin 0.9s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     }
     .tech-loader div:nth-child(2) {
       width: 75%; height: 75%;
       top: 12.5%; left: 12.5%;
       border-top-color: #d4a373;
       animation-direction: reverse;
-      animation-duration: 0.9s;
+      animation-duration: 0.7s;
     }
 
     @keyframes techSpin {
@@ -219,7 +216,6 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* Glass Container with PowerPoint View Transition */
     .container {
       max-width: 500px;
       width: 92%;
@@ -234,12 +230,12 @@
       border: 1.5px solid var(--card-border);
       margin: auto 0;
       position: relative;
-      animation: powerPointMorph 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: mediumMorph 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    @keyframes powerPointMorph {
-      0% { opacity: 0; transform: scale(0.90) translateY(40px); filter: blur(6px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+    @keyframes mediumMorph {
+      0% { opacity: 0; transform: scale(0.94) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .container::-webkit-scrollbar { width: 5px; }
@@ -252,10 +248,9 @@
       text-align: center;
       margin-bottom: 18px;
       font-weight: 700;
-      animation: fadeIn 0.6s ease;
+      animation: fadeIn 0.3s ease;
     }
 
-    /* Glass User Profile Bar */
     .user-profile-bar {
       display: flex;
       align-items: center;
@@ -284,13 +279,12 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.25s;
     }
     .logout-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     
-    /* Glass Tiles & Glass Icons */
     .tile {
       display: flex;
       flex-direction: column;
@@ -309,17 +303,16 @@
       text-align: center;
       cursor: pointer;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .tile:hover { 
-      transform: translateY(-6px) scale(1.03); 
-      box-shadow: 0 20px 40px rgba(244, 196, 48, 0.2); 
+      transform: translateY(-5px) scale(1.02); 
+      box-shadow: 0 15px 35px rgba(244, 196, 48, 0.2); 
       border-color: var(--accent-gold);
       background: rgba(255, 255, 255, 0.12);
     }
     .tile:active { transform: scale(0.95); }
 
-    /* Glass Icon Box inside Tiles */
     .tile .ico {
       width: 52px; height: 52px;
       background: rgba(244, 196, 48, 0.12);
@@ -332,10 +325,10 @@
       font-size: 24px;
       color: var(--accent-gold);
       box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.4s;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
     }
     .tile:hover .ico {
-      transform: scale(1.15) rotate(6deg);
+      transform: scale(1.12) rotate(5deg);
       background: rgba(244, 196, 48, 0.22);
     }
 
@@ -364,7 +357,7 @@
       backdrop-filter: blur(10px);
       color: var(--text-main);
       box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
     input:focus { 
       border-color: var(--accent-gold); 
@@ -386,9 +379,9 @@
       cursor: pointer;
       text-align: center;
       box-shadow: 0 10px 25px rgba(212, 163, 115, 0.35);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, box-shadow 0.3s;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, box-shadow 0.25s;
     }
-    .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212, 163, 115, 0.5); opacity: 0.95; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(212, 163, 115, 0.45); opacity: 0.95; }
     .btn:active { transform: scale(0.96); }
     .btn.secondary { 
       background: var(--chip-bg); 
@@ -416,10 +409,10 @@
 
     .camera-status { color: var(--text-sub); font-size: 13px; text-align: center; font-weight: 600; }
 
-    .icon { font-size: 55px; margin-bottom: 10px; text-align: center; color: var(--accent-gold); animation: powerPointBounce 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes powerPointBounce {
+    .icon { font-size: 55px; margin-bottom: 10px; text-align: center; color: var(--accent-gold); animation: mediumBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes mediumBounce {
       0% { transform: scale(0); opacity: 0; }
-      70% { transform: scale(1.15); opacity: 1; }
+      70% { transform: scale(1.12); opacity: 1; }
       100% { transform: scale(1); opacity: 1; }
     }
 
@@ -449,14 +442,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      animation: powerPointSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: transform 0.3s;
+      animation: mediumSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.25s;
     }
-    .home-btn:hover { transform: scale(1.08); }
-    .home-btn:active { transform: scale(0.92); }
+    .home-btn:hover { transform: scale(1.06); }
+    .home-btn:active { transform: scale(0.94); }
 
-    @keyframes powerPointSlideUp {
-      from { transform: translateY(50px); opacity: 0; }
+    @keyframes mediumSlideUp {
+      from { transform: translateY(40px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
@@ -464,9 +457,9 @@
       display: flex; align-items: center; width: 100%; padding: 14px; margin: 8px 0;
       background: var(--chip-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: 14px;
       cursor: pointer; font-size: 15px; color: var(--text-main); font-weight: 600;
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
-    .suggestion-btn:hover { background: rgba(255,255,255,0.15); transform: translateX(-5px); border-color: var(--accent-gold); }
+    .suggestion-btn:hover { background: rgba(255,255,255,0.15); transform: translateX(-4px); border-color: var(--accent-gold); }
 
     .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
@@ -474,17 +467,17 @@
     .day-chip label {
       display: block; padding: 10px 4px; text-align: center; font-weight: 600; font-size: 12px;
       color: var(--text-main); background: var(--chip-bg); backdrop-filter: blur(8px); border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.25s;
     }
-    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); transform: scale(1.04); font-weight: bold; }
+    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); transform: scale(1.03); font-weight: bold; }
 
     .admin-item {
       display: flex; align-items: center; justify-content: space-between;
       background: var(--chip-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 14px; margin-bottom: 8px; font-size: 13px;
-      animation: fadeIn 0.5s ease;
+      animation: fadeIn 0.3s ease;
     }
     .admin-del-btn { background: rgba(239, 68, 68, 0.25); color: #ef4444; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: transform 0.2s; }
-    .admin-del-btn:hover { transform: scale(1.1); background: #ef4444; color: #fff; }
+    .admin-del-btn:hover { transform: scale(1.08); background: #ef4444; color: #fff; }
 
     #offlineOverlay {
       display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -505,7 +498,7 @@
     </div>
     <div class="top-actions">
       <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" title="تغيير اللغة / Switch Language"><span style="font-weight:bold; font-size:12px;" id="langLabel">EN</span></button>
-      <button class="icon-btn" id="themeToggleBtn" onclick="cycleTheme()" title="الثيم (حسب الجهاز)"><i class="fa-solid fa-mobile-screen"></i></button>
+      <button class="icon-btn" id="themeToggleBtn" onclick="cycleTheme()" title="الثيم"><i class="fa-solid fa-moon"></i></button>
       <button class="icon-btn" onclick="openAdminSettings()" title="إدارة الخدام"><i class="fa-solid fa-user-shield"></i></button>
     </div>
   </header>
@@ -581,10 +574,11 @@
       <div id="searchResults" style="margin-top:15px;"></div>
     </div>
 
-    <!-- 3.5 Card Share View (Updated: search name outside, click name to inspect QR status & Drive copy share) -->
+    <!-- 3.5 Card Share View (Returned search button & single preview card view) -->
     <div id="cardShareView" style="display:none;">
       <h2><i class="fa-solid fa-share-nodes"></i> <span data-i18n="shareCardTitle">مشاركة كارت المخدوم</span></h2>
-      <input type="text" id="shareNameInput" placeholder="اكتب اسم المخدوم للبحث..." data-i18n-placeholder="sharePlaceholder" autocomplete="off" oninput="executeCardSearch()">
+      <input type="text" id="shareNameInput" placeholder="اكتب اسم المخدوم للبحث..." data-i18n-placeholder="sharePlaceholder" autocomplete="off">
+      <button class="btn" onclick="executeCardSearch()" data-i18n="searchCardBtn">بحث عن الكارت</button>
       <div id="shareResults" style="margin-top:15px;"></div>
     </div>
 
@@ -678,9 +672,8 @@
     var verifiedPassword = "";
     var currentActiveViewId = "loginView";
     var currentLang = localStorage.getItem("app_lang") || "ar";
-    var currentThemeMode = localStorage.getItem("app_theme") || "device";
+    var currentThemeMode = localStorage.getItem("app_theme") || "dark";
 
-    // Bilingual dictionary & backend message translator
     const translations = {
       ar: {
         offlineMsg: "⚠️ لا توجد اتصال بالإنترنت، يرجى التحقق من الشبكة",
@@ -731,7 +724,7 @@
         scanAnother: "مسح آخر",
         alreadyShared: "✅ تمت مشاركته مسبقاً",
         notShared: "⚠️ لم يتم مشاركته من قبل",
-        sendCopyBtn: "📤 إرسال نسخة (Send a Copy)",
+        sendCopyBtn: "📤 مشاركة الصورة (Send a Copy)",
         viewCardBtn: "👁️ عرض الكارت"
       },
       en: {
@@ -788,7 +781,6 @@
       }
     };
 
-    // Frontend Backend Feedback Translator
     const backendMsgMap = {
       "إجراء غير معروف": { ar: "إجراء غير معروف", en: "Unknown action" },
       "الخادم مشغول حالياً، يرجى المحاولة بعد قليل.": { ar: "الخادم مشغول حالياً، يرجى المحاولة بعد قليل.", en: "Server is busy, please try again shortly." },
@@ -846,9 +838,14 @@
       currentThemeMode = mode;
       localStorage.setItem("app_theme", mode);
       const body = document.body;
+      const btn = document.getElementById("themeToggleBtn");
       let effectiveTheme = mode;
       if (mode === "device") effectiveTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+
       body.setAttribute("data-theme", effectiveTheme);
+      if (mode === "dark") btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+      else if (mode === "light") btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+      else btn.innerHTML = '<i class="fa-solid fa-mobile-screen"></i>';
     }
 
     function cycleTheme() {
@@ -930,7 +927,7 @@
       toast.className = `toast ${type}`;
       toast.innerText = translateText(message);
       container.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3500);
+      setTimeout(() => { toast.remove(); }, 3000);
     }
 
     function showView(viewId, pushHistory = true) {
@@ -940,7 +937,7 @@
       const container = document.getElementById("mainContainer");
       container.style.animation = 'none';
       container.offsetHeight; 
-      container.style.animation = 'powerPointMorph 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      container.style.animation = 'mediumMorph 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
 
       if (viewId !== 'adminSettingsView') {
         const lockEl = document.getElementById("adminSettingsLock");
@@ -980,7 +977,7 @@
 
       if (viewId === "scanView") {
         isProcessingScan = false;
-        setTimeout(startLiveScanner, 200);
+        setTimeout(startLiveScanner, 150);
       }
     }
 
@@ -1048,8 +1045,8 @@
           localStorage.setItem("app_user", JSON.stringify(currentUser));
           setupUserProfileUI();
           checkDirectUrlScan();
-        } else { showLoginError("❌ Sorry, email (" + payload.email + ") is not authorized."); }
-      } catch(e) { hideLoader(); showLoginError("Connection error with server."); }
+        } else { showLoginError("❌ Sorry, email is not authorized."); }
+      } catch(e) { hideLoader(); showLoginError("Connection error."); }
     }
 
     function setupUserProfileUI() {
@@ -1139,7 +1136,7 @@
 
     function restartScanner() {
       isProcessingScan = false;
-      stopLiveScanner().then(() => { setTimeout(startLiveScanner, 250); });
+      stopLiveScanner().then(() => { setTimeout(startLiveScanner, 200); });
     }
 
     function onScanSuccess(text) {
@@ -1192,33 +1189,48 @@
       } catch (err) { resDiv.innerHTML = ""; showToast("❌ Error during search", "error"); }
     }
 
-    // Updated Card Search: searchable from outside by name, click name to inspect QR status & share Send a Copy
+    // Updated Card Search: name outside with share status, expandable single view with card preview and working Send a Copy share button
     async function executeCardSearch() {
       var name = document.getElementById("shareNameInput").value.trim();
       var resDiv = document.getElementById("shareResults");
-      if (!name) { resDiv.innerHTML = ""; return; }
+      if (!name) { showToast("⚠️ Please enter a servant name", "error"); return; }
 
+      resDiv.innerHTML = "<div style='text-align:center; padding:12px;'><div class='tech-loader' style='margin:0 auto 10px;'></div>Searching...</div>";
       try {
         const res = await apiCall("search_card_share", { name: name });
         resDiv.innerHTML = "";
         if (res && res.status === "success" && Array.isArray(res.matches)) {
           res.matches.forEach(item => {
             var cardBox = document.createElement("div");
-            cardBox.style.cssText = "background:var(--chip-bg); backdrop-filter:blur(10px); border:1.5px solid var(--card-border); padding:14px; border-radius:16px; margin-bottom:12px; text-align:center; animation: fadeIn 0.4s ease; cursor:pointer;";
+            cardBox.style.cssText = "background:var(--chip-bg); backdrop-filter:blur(10px); border:1.5px solid var(--card-border); padding:14px; border-radius:16px; margin-bottom:12px; text-align:center; cursor:pointer; transition: all 0.25s;";
             
             let statusText = item.isNew ? translations[currentLang].notShared : translations[currentLang].alreadyShared;
             let statusColor = item.isNew ? "#f59e0b" : "#16a34a";
 
             cardBox.innerHTML = `
-              <div style="font-weight:bold; font-size:16px; color:var(--accent-gold); margin-bottom:6px;">👤 ${item.name}</div>
-              <div style="font-size:12px; font-weight:600; color:${statusColor}; margin-bottom:10px;">${statusText}</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:bold; font-size:15px; color:var(--accent-gold);">👤 ${item.name}</div>
+                <div style="font-size:12px; font-weight:600; color:${statusColor};">${statusText}</div>
+              </div>
             `;
             
             var detailsContainer = document.createElement("div");
             detailsContainer.style.display = "none";
-            detailsContainer.style.marginTop = "10px";
-            detailsContainer.style.paddingTop = "10px";
+            detailsContainer.style.marginTop = "12px";
+            detailsContainer.style.paddingTop = "12px";
             detailsContainer.style.borderTop = "1px dashed var(--card-border)";
+
+            let fetchUrl = item.driveUrl;
+            if (fetchUrl.includes("drive.google.com")) {
+              let matchId = fetchUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+              if (matchId && matchId[1]) fetchUrl = "https://lh3.googleusercontent.com/d/" + matchId[1];
+            }
+
+            detailsContainer.innerHTML = `
+              <div style="margin-bottom:12px;">
+                <img src="${fetchUrl}" alt="Card Preview" style="width:100%; max-height:240px; object-fit:contain; border-radius:12px; border:1px solid var(--card-border); background:#000;">
+              </div>
+            `;
 
             var shareBtn = document.createElement("button");
             shareBtn.className = "btn";
@@ -1228,17 +1240,7 @@
               shareCardImage(item.fileId, item.driveUrl, item.name);
             };
 
-            var viewCardBtn = document.createElement("button");
-            viewCardBtn.className = "btn secondary";
-            viewCardBtn.style.marginTop = "6px";
-            viewCardBtn.innerHTML = `<i class="fa-solid fa-eye"></i> ${translations[currentLang].viewCardBtn}`;
-            viewCardBtn.onclick = (e) => {
-              e.stopPropagation();
-              window.open(item.driveUrl, '_blank');
-            };
-
             detailsContainer.appendChild(shareBtn);
-            detailsContainer.appendChild(viewCardBtn);
             cardBox.appendChild(detailsContainer);
 
             cardBox.onclick = () => {
@@ -1247,12 +1249,8 @@
 
             resDiv.appendChild(cardBox);
           });
-        } else {
-          resDiv.innerHTML = `<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:10px;">❌ No cards found</div>`;
-        }
-      } catch(e) {
-        resDiv.innerHTML = "";
-      }
+        } else { showToast("❌ No cards found for this name", "error"); }
+      } catch(e) { resDiv.innerHTML = ""; showToast("❌ Search error", "error"); }
     }
 
     async function shareCardImage(fileId, driveUrl, studentName) {
