@@ -1,4 +1,4 @@
-const CACHE_NAME = "PWA-Cache-v1";
+const CACHE_NAME = "PWA-Cache-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const ASSETS_TO_CACHE = [
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",
-  "./icon-maskable-512 (2).png"
+  "./icon-maskable-512 (3).png"
 ];
 
 // Install Event - Pre-cache core app shell assets
