@@ -1,12 +1,12 @@
-const CACHE_NAME = "attendance-app-v5";
+const CACHE_NAME = "PWA-Cache-v1";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./css/styles.css",
   "./js/app.js",
   "./manifest.json",
-  "./App-Icon-192.png",
-  "./App-Icon-512.png"
+  "./PWA-ICON-192.png",
+  "./PWA-ICON-512.png"
 ];
 
 // Install Event - Pre-cache core app shell assets
