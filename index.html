@@ -14,33 +14,33 @@
   
   <style>
     :root {
-      --bg-gradient: radial-gradient(circle at top, #1b263b 0%, #0d1b2a 100%);
-      --app-bar-bg: rgba(13, 27, 42, 0.75);
-      --card-bg: rgba(22, 36, 56, 0.65);
-      --card-border: rgba(255, 255, 255, 0.15);
-      --text-main: #f1f5f9;
-      --text-sub: #cbd5e1;
-      --accent-gold: #f4c430;
-      --accent-gold-hover: #d4a373;
-      --input-bg: rgba(13, 27, 42, 0.5);
-      --chip-bg: rgba(255, 255, 255, 0.08);
-      --chip-border: rgba(255, 255, 255, 0.18);
-      --shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+      --bg-gradient: radial-gradient(circle at 15% 15%, #1e1b4b 0%, #0f172a 50%, #020617 100%);
+      --app-bar-bg: rgba(15, 23, 42, 0.7);
+      --card-bg: rgba(30, 41, 59, 0.6);
+      --card-border: rgba(255, 255, 255, 0.14);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent-gold: #f59e0b;
+      --accent-gold-hover: #d97706;
+      --input-bg: rgba(15, 23, 42, 0.5);
+      --chip-bg: rgba(255, 255, 255, 0.06);
+      --chip-border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
     }
 
     [data-theme="light"] {
-      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      --app-bar-bg: rgba(255, 255, 255, 0.8);
-      --card-bg: rgba(255, 255, 255, 0.8);
-      --card-border: rgba(180, 83, 9, 0.2);
+      --bg-gradient: radial-gradient(circle at 15% 15%, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+      --app-bar-bg: rgba(255, 255, 255, 0.75);
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --card-border: rgba(217, 119, 6, 0.25);
       --text-main: #0f172a;
-      --text-sub: #475569;
-      --accent-gold: #b45309;
-      --accent-gold-hover: #92400e;
+      --text-sub: #64748b;
+      --accent-gold: #d97706;
+      --accent-gold-hover: #b45309;
       --input-bg: rgba(248, 250, 252, 0.9);
       --chip-bg: rgba(0, 0, 0, 0.04);
       --chip-border: rgba(0, 0, 0, 0.1);
-      --shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      --shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
     }
 
     * { 
@@ -48,6 +48,7 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       margin: 0;
       padding: 0;
+      -webkit-font-smoothing: antialiased;
     }
 
     html, body {
@@ -55,6 +56,7 @@
       overflow: hidden;
     }
 
+    /* Blurred Gradient Mesh Background */
     body {
       background: var(--bg-gradient);
       background-attachment: fixed;
@@ -67,29 +69,64 @@
       -webkit-tap-highlight-color: transparent;
       padding-top: 70px;
       padding-bottom: 20px;
+      position: relative;
+      will-change: background;
     }
 
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      filter: blur(90px);
+      z-index: -1;
+      opacity: 0.4;
+      animation: floatOrbs 12s ease-in-out infinite alternate;
+      will-change: transform;
+    }
+
+    body::before {
+      background: rgba(245, 158, 11, 0.4);
+      top: 10%;
+      left: 15%;
+    }
+
+    body::after {
+      background: rgba(56, 189, 248, 0.35);
+      bottom: 10%;
+      right: 15%;
+      animation-delay: -6s;
+    }
+
+    @keyframes floatOrbs {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(0, 35px, 0) scale(1.1); }
+    }
+
+    /* Glass Top App Bar */
     .top-app-bar {
       position: fixed;
       top: 0; left: 0; right: 0;
       height: 64px;
       background: var(--app-bar-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       color: var(--text-main);
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
       z-index: 1000;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
       border-bottom: 1px solid var(--card-border);
-      animation: mediumSlideDown 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      animation: slideDownBar 0.35s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      transform: translateZ(0);
     }
 
-    @keyframes mediumSlideDown {
-      0% { transform: translateY(-100%); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
+    @keyframes slideDownBar {
+      0% { transform: translate3d(0, -100%, 0); opacity: 0; }
+      100% { transform: translate3d(0, 0, 0); opacity: 1; }
     }
 
     .top-app-bar .brand {
@@ -116,8 +153,8 @@
 
     .icon-btn {
       background: var(--chip-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       border: 1px solid var(--chip-border);
       color: var(--accent-gold);
       width: 40px; height: 40px;
@@ -127,11 +164,12 @@
       justify-content: center;
       cursor: pointer;
       font-size: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s;
+      will-change: transform;
     }
-    .icon-btn:hover { transform: scale(1.12); filter: brightness(1.2); }
-    .icon-btn:active { transform: scale(0.90); }
+    .icon-btn:hover { transform: scale(1.1); filter: brightness(1.15); }
+    .icon-btn:active { transform: scale(0.92); }
 
     .toast-container {
       position: fixed;
@@ -153,30 +191,32 @@
       font-size: 14px;
       text-align: center;
       box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-      animation: mediumZoomIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, fadeOut 0.3s ease-in 2.8s forwards;
+      animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, toastOut 0.25s ease-in 2.7s forwards;
       pointer-events: auto;
       color: #fff;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(15px);
+      will-change: transform, opacity;
     }
     .toast.error { background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(239, 68, 68, 0.4); }
     .toast.success { background: rgba(22, 163, 74, 0.9); border: 1px solid rgba(22, 163, 74, 0.4); }
     .toast.info { background: rgba(37, 99, 235, 0.9); border: 1px solid rgba(37, 99, 235, 0.4); }
 
-    @keyframes mediumZoomIn {
-      0% { opacity: 0; transform: scale(0.7) translateY(-15px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+    @keyframes toastIn { 
+      0% { opacity: 0; transform: translate3d(0, -20px, 0) scale(0.9); } 
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 
     }
-    @keyframes fadeOut {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0.9) translateY(-10px); }
+    @keyframes toastOut { 
+      0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 
+      100% { opacity: 0; transform: translate3d(0, -15px, 0) scale(0.95); } 
     }
 
+    /* Tech Loader Animation */
     .loader-overlay {
       display: none;
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(13, 27, 42, 0.82);
-      backdrop-filter: blur(15px);
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(18px);
       z-index: 500;
       border-radius: 28px;
       flex-direction: column;
@@ -184,14 +224,14 @@
       align-items: center;
       color: var(--accent-gold);
       font-weight: 700;
-      animation: fadeIn 0.25s ease;
+      animation: fadeIn 0.2s ease;
     }
 
     .tech-loader {
       position: relative;
-      width: 50px;
-      height: 50px;
-      margin-bottom: 14px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
     }
     .tech-loader div {
       box-sizing: border-box;
@@ -201,14 +241,14 @@
       border: 4px solid transparent;
       border-top-color: var(--accent-gold);
       border-radius: 50%;
-      animation: techSpin 0.9s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+      animation: techSpin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     }
     .tech-loader div:nth-child(2) {
       width: 75%; height: 75%;
       top: 12.5%; left: 12.5%;
-      border-top-color: #d4a373;
+      border-top-color: #38bdf8;
       animation-direction: reverse;
-      animation-duration: 0.7s;
+      animation-duration: 0.6s;
     }
 
     @keyframes techSpin {
@@ -216,26 +256,29 @@
       100% { transform: rotate(360deg); }
     }
 
+    /* Glass Container */
     .container {
       max-width: 500px;
       width: 92%;
       max-height: 85vh;
       overflow-y: auto;
       background: var(--card-bg);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
       padding: 24px;
       border-radius: 28px;
       box-shadow: var(--shadow);
       border: 1.5px solid var(--card-border);
       margin: auto 0;
       position: relative;
-      animation: mediumMorph 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: viewEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transform: translateZ(0);
+      will-change: transform, opacity;
     }
 
-    @keyframes mediumMorph {
-      0% { opacity: 0; transform: scale(0.94) translateY(20px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
+    @keyframes viewEnter {
+      0% { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.96); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
     }
 
     .container::-webkit-scrollbar { width: 5px; }
@@ -248,7 +291,6 @@
       text-align: center;
       margin-bottom: 18px;
       font-weight: 700;
-      animation: fadeIn 0.3s ease;
     }
 
     .user-profile-bar {
@@ -256,7 +298,7 @@
       align-items: center;
       justify-content: space-between;
       background: var(--chip-bg);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(15px);
       border: 1px solid var(--chip-border);
       padding: 12px 16px;
       border-radius: 18px;
@@ -279,7 +321,7 @@
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.2s;
     }
     .logout-btn:hover { background: #ef4444; color: #fff; transform: scale(1.05); }
 
@@ -293,8 +335,8 @@
       gap: 12px;
       min-height: 125px;
       background: var(--chip-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border: 1.5px solid var(--chip-border);
       border-radius: 22px;
       color: var(--text-main);
@@ -303,21 +345,22 @@
       text-align: center;
       cursor: pointer;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, border-color 0.25s;
+      will-change: transform;
     }
     .tile:hover { 
-      transform: translateY(-5px) scale(1.02); 
-      box-shadow: 0 15px 35px rgba(244, 196, 48, 0.2); 
+      transform: translate3d(0, -4px, 0) scale(1.02); 
+      box-shadow: 0 15px 35px rgba(245, 158, 11, 0.25); 
       border-color: var(--accent-gold);
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.09);
     }
     .tile:active { transform: scale(0.95); }
 
     .tile .ico {
       width: 52px; height: 52px;
-      background: rgba(244, 196, 48, 0.12);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(244, 196, 48, 0.35);
+      background: rgba(245, 158, 11, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(245, 158, 11, 0.35);
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -325,15 +368,15 @@
       font-size: 24px;
       color: var(--accent-gold);
       box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      will-change: transform;
     }
     .tile:hover .ico {
-      transform: scale(1.12) rotate(5deg);
-      background: rgba(244, 196, 48, 0.22);
+      transform: scale(1.12) rotate(4deg);
     }
 
     .tile.primary {
-      background: linear-gradient(135deg, rgba(244, 196, 48, 0.85) 0%, rgba(180, 83, 9, 0.85) 100%);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.85) 0%, rgba(180, 83, 9, 0.85) 100%);
       border: 1.5px solid rgba(255, 255, 255, 0.3);
       color: #ffffff;
     }
@@ -354,15 +397,14 @@
       margin-bottom: 12px;
       font-weight: 600;
       background: var(--input-bg);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
       color: var(--text-main);
       box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
     }
     input:focus { 
       border-color: var(--accent-gold); 
-      box-shadow: 0 0 0 4px rgba(244, 196, 48, 0.25), inset 0 2px 6px rgba(0,0,0,0.2); 
-      transform: scale(1.01);
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25), inset 0 2px 6px rgba(0,0,0,0.2); 
     }
 
     .btn {
@@ -372,25 +414,26 @@
       margin-top: 10px;
       font-size: 15px;
       font-weight: 700;
-      background: linear-gradient(135deg, #f4c430 0%, #d4a373 100%);
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
       color: #0d1b2a;
       border: none;
       border-radius: 16px;
       cursor: pointer;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(212, 163, 115, 0.35);
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, box-shadow 0.25s;
+      box-shadow: 0 10px 25px rgba(217, 119, 6, 0.35);
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s, box-shadow 0.2s;
+      will-change: transform;
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(212, 163, 115, 0.45); opacity: 0.95; }
+    .btn:hover { transform: translate3d(0, -2px, 0); box-shadow: 0 12px 25px rgba(217, 119, 6, 0.45); opacity: 0.95; }
     .btn:active { transform: scale(0.96); }
     .btn.secondary { 
       background: var(--chip-bg); 
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
       color: var(--text-main); 
       border: 1.5px solid var(--chip-border); 
       box-shadow: 0 8px 20px rgba(0,0,0,0.1); 
     }
-    .btn.secondary:hover { border-color: var(--accent-gold); background: rgba(255, 255, 255, 0.15); }
+    .btn.secondary:hover { border-color: var(--accent-gold); background: rgba(255, 255, 255, 0.12); }
 
     .camera-wrapper {
       border: 2px solid var(--accent-gold);
@@ -409,21 +452,21 @@
 
     .camera-status { color: var(--text-sub); font-size: 13px; text-align: center; font-weight: 600; }
 
-    .icon { font-size: 55px; margin-bottom: 10px; text-align: center; color: var(--accent-gold); animation: mediumBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes mediumBounce {
+    .icon { font-size: 55px; margin-bottom: 10px; text-align: center; color: var(--accent-gold); animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes bounceIn {
       0% { transform: scale(0); opacity: 0; }
-      70% { transform: scale(1.12); opacity: 1; }
+      70% { transform: scale(1.1); opacity: 1; }
       100% { transform: scale(1); opacity: 1; }
     }
 
     .title { font-size: 20px; color: var(--text-main); font-weight: 700; margin-bottom: 12px; text-align: center; }
     .name {
       font-size: 22px; color: var(--accent-gold); font-weight: 700; margin-bottom: 12px;
-      background: var(--chip-bg); backdrop-filter: blur(10px); padding: 14px; border-radius: 16px; border: 1px dashed var(--accent-gold); text-align: center;
+      background: var(--chip-bg); backdrop-filter: blur(12px); padding: 14px; border-radius: 16px; border: 1px dashed var(--accent-gold); text-align: center;
     }
     .status-tag {
       font-size: 14px; padding: 12px; border-radius: 14px; display: block; font-weight: 600;
-      background: var(--chip-bg); backdrop-filter: blur(10px); color: var(--text-main); text-align: center; margin-bottom: 14px; border: 1px solid var(--card-border);
+      background: var(--chip-bg); backdrop-filter: blur(12px); color: var(--text-main); text-align: center; margin-bottom: 14px; border: 1px solid var(--card-border);
     }
 
     .home-btn {
@@ -442,39 +485,39 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      animation: mediumSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: transform 0.25s;
+      animation: slideUpHome 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: transform 0.2s;
+      will-change: transform;
     }
     .home-btn:hover { transform: scale(1.06); }
     .home-btn:active { transform: scale(0.94); }
 
-    @keyframes mediumSlideUp {
-      from { transform: translateY(40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @keyframes slideUpHome {
+      from { transform: translate3d(0, 40px, 0); opacity: 0; }
+      to { transform: translate3d(0, 0, 0); opacity: 1; }
     }
 
     .suggestion-btn {
       display: flex; align-items: center; width: 100%; padding: 14px; margin: 8px 0;
-      background: var(--chip-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: 14px;
+      background: var(--chip-bg); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 14px;
       cursor: pointer; font-size: 15px; color: var(--text-main); font-weight: 600;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
     }
-    .suggestion-btn:hover { background: rgba(255,255,255,0.15); transform: translateX(-4px); border-color: var(--accent-gold); }
+    .suggestion-btn:hover { background: rgba(255,255,255,0.12); transform: translate3d(-3px, 0, 0); border-color: var(--accent-gold); }
 
     .days-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; }
     .day-chip { position: relative; flex: 1 1 30%; }
     .day-chip input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
     .day-chip label {
       display: block; padding: 10px 4px; text-align: center; font-weight: 600; font-size: 12px;
-      color: var(--text-main); background: var(--chip-bg); backdrop-filter: blur(8px); border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer;
-      transition: all 0.25s;
+      color: var(--text-main); background: var(--chip-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer;
+      transition: all 0.2s;
     }
-    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); transform: scale(1.03); font-weight: bold; }
+    .day-chip input:checked + label { background: var(--accent-gold); color: #0d1b2a; border-color: var(--accent-gold); transform: scale(1.02); font-weight: bold; }
 
     .admin-item {
       display: flex; align-items: center; justify-content: space-between;
-      background: var(--chip-bg); backdrop-filter: blur(10px); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 14px; margin-bottom: 8px; font-size: 13px;
-      animation: fadeIn 0.3s ease;
+      background: var(--chip-bg); backdrop-filter: blur(12px); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 14px; margin-bottom: 8px; font-size: 13px;
     }
     .admin-del-btn { background: rgba(239, 68, 68, 0.25); color: #ef4444; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: transform 0.2s; }
     .admin-del-btn:hover { transform: scale(1.08); background: #ef4444; color: #fff; }
@@ -487,27 +530,18 @@
   </style>
 </head>
 <body data-theme="dark">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then((reg) => console.log('Service Worker registered:', reg.scope))
-        .catch((err) => console.error('Service Worker registration failed:', err));
-    });
-  }
-  </script>
 
   <div id="toastContainer" class="toast-container"></div>
   <div id="offlineOverlay" data-i18n="offlineMsg">⚠️ لا توجد اتصال بالإنترنت، يرجى التحقق من الشبكة</div>
 
   <header class="top-app-bar">
     <div class="brand">
-      <img src="icon-maskable-512 (2).png" alt="App Icon">
+      <img src="new-icon-512.png" alt="App Icon">
       <span>Lambas Bible</span>
     </div>
     <div class="top-actions">
       <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" title="تغيير اللغة / Switch Language"><span style="font-weight:bold; font-size:12px;" id="langLabel">EN</span></button>
-      <button class="icon-btn" id="themeToggleBtn" onclick="cycleTheme()" title="الثيم"><i class="fa-solid fa-moon"></i></button>
+      <button class="icon-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تبديل الثيم"><i class="fa-solid fa-moon"></i></button>
       <button class="icon-btn" onclick="openAdminSettings()" title="إدارة الخدام"><i class="fa-solid fa-user-shield"></i></button>
     </div>
   </header>
@@ -575,7 +609,7 @@
       <button class="btn secondary" style="margin-top:12px;" onclick="restartScanner()"><i class="fa-solid fa-rotate"></i> <span data-i18n="restartCamera">إعادة تشغيل الكاميرا</span></button>
     </div>
 
-    <!-- 3. Search View -->
+    <!-- 3. Search View (With Tech Loader in Search Results) -->
     <div id="searchView" style="display:none;">
       <h2><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="quickSearchTitle">التحضير السريع بالاسم</span></h2>
       <input type="text" id="searchNameInput" placeholder="اكتب الاسم هنا..." data-i18n-placeholder="searchPlaceholder" autocomplete="off">
@@ -583,12 +617,24 @@
       <div id="searchResults" style="margin-top:15px;"></div>
     </div>
 
-    <!-- 3.5 Card Share View (Returned search button & single preview card view) -->
+    <!-- 3.5 Card Share View (Search Name Outside with State -> Opens Individual Preview View) -->
     <div id="cardShareView" style="display:none;">
       <h2><i class="fa-solid fa-share-nodes"></i> <span data-i18n="shareCardTitle">مشاركة كارت المخدوم</span></h2>
       <input type="text" id="shareNameInput" placeholder="اكتب اسم المخدوم للبحث..." data-i18n-placeholder="sharePlaceholder" autocomplete="off">
       <button class="btn" onclick="executeCardSearch()" data-i18n="searchCardBtn">بحث عن الكارت</button>
       <div id="shareResults" style="margin-top:15px;"></div>
+    </div>
+
+    <!-- 3.6 Individual Card Preview View (Dedicated Sub-View for Image Preview & Sharing) -->
+    <div id="cardPreviewView" style="display:none;">
+      <h2><i class="fa-solid fa-eye"></i> <span data-i18n="cardPreviewTitle">معاينة الكارت والمشاركة</span></h2>
+      <div class="name" id="previewStudentName">اسم المخدوم</div>
+      <div class="camera-wrapper" style="background:#0f172a; min-height:280px; display:flex; align-items:center; justify-content:center; padding:10px;">
+        <img id="previewCardImg" src="" alt="Card Preview" style="max-width:100%; max-height:320px; object-fit:contain; border-radius:14px; border:1px solid var(--card-border);">
+      </div>
+      <button class="btn" onclick="shareCurrentCardImage()"><i class="fa-solid fa-share-nodes"></i> <span data-i18n="sendCopyBtn">📤 مشاركة الصورة (Send a Copy)</span></button>
+      <button class="btn secondary" onclick="openCurrentCardDrive()"><i class="fa-solid fa-folder-open"></i> <span data-i18n="openDriveBtn">فتح في Google Drive</span></button>
+      <button class="btn secondary" style="margin-top:8px;" onclick="showView('cardShareView')"><i class="fa-solid fa-arrow-right"></i> <span data-i18n="backBtn">رجوع</span></button>
     </div>
 
     <!-- 4. Add Student View -->
@@ -618,7 +664,7 @@
         <h3 style="font-size:14px; color:var(--accent-gold); margin-bottom:8px;" data-i18n="adminsListTitle">👥 قائمة الخدام</h3>
         <div id="adminsListContainer" style="margin-bottom:12px;"></div>
         
-        <div style="background:var(--chip-bg); backdrop-filter:blur(8px); padding:10px; border-radius:14px; border:1px dashed var(--card-border); margin-bottom:12px;">
+        <div style="background:var(--chip-bg); backdrop-filter:blur(10px); padding:10px; border-radius:14px; border:1px dashed var(--card-border); margin-bottom:12px;">
           <input type="text" id="newAdminEmail" placeholder="البريد الإلكتروني للخادم الجديد" data-i18n-placeholder="newAdminEmailPlaceholder" style="margin-bottom:8px;">
           <input type="text" id="newAdminNameInput" placeholder="اسم الخادم" data-i18n-placeholder="newAdminNamePlaceholder" style="margin-bottom:8px;">
           <button class="btn secondary" onclick="addNewAdmin()">➕ <span data-i18n="addAdminBtn">إضافة خادم جديد</span></button>
@@ -682,6 +728,9 @@
     var currentActiveViewId = "loginView";
     var currentLang = localStorage.getItem("app_lang") || "ar";
     var currentThemeMode = localStorage.getItem("app_theme") || "dark";
+    
+    // Active selected card data for preview & share
+    var activePreviewCard = { fileId: "", driveUrl: "", name: "" };
 
     const translations = {
       ar: {
@@ -707,6 +756,7 @@
         shareCardTitle: "مشاركة كارت المخدوم",
         sharePlaceholder: "اكتب اسم المخدوم للبحث...",
         searchCardBtn: "بحث عن الكارت",
+        cardPreviewTitle: "معاينة الكارت والمشاركة",
         addStudentTitle: "إضافة مخدوم جديد",
         studentNamePlaceholder: "اسم المخدوم ثلاثي...",
         saveGenerateBtn: "حفظ وتوليد الكارت 🎨",
@@ -734,7 +784,9 @@
         alreadyShared: "✅ تمت مشاركته مسبقاً",
         notShared: "⚠️ لم يتم مشاركته من قبل",
         sendCopyBtn: "📤 مشاركة الصورة (Send a Copy)",
-        viewCardBtn: "👁️ عرض الكارت"
+        openDriveBtn: "فتح في Google Drive",
+        backBtn: "رجوع",
+        searching: "جاري البحث..."
       },
       en: {
         offlineMsg: "⚠️ No internet connection, please check your network",
@@ -759,6 +811,7 @@
         shareCardTitle: "Share Servant Card",
         sharePlaceholder: "Type servant name...",
         searchCardBtn: "Search Card",
+        cardPreviewTitle: "Card Preview & Sharing",
         addStudentTitle: "Add New Servant",
         studentNamePlaceholder: "Full servant name...",
         saveGenerateBtn: "Save & Generate Card 🎨",
@@ -786,7 +839,9 @@
         alreadyShared: "✅ Already shared",
         notShared: "⚠️ Not shared yet",
         sendCopyBtn: "📤 Send a Copy",
-        viewCardBtn: "👁️ View Card"
+        openDriveBtn: "Open in Google Drive",
+        backBtn: "Back",
+        searching: "Searching..."
       }
     };
 
@@ -848,18 +903,13 @@
       localStorage.setItem("app_theme", mode);
       const body = document.body;
       const btn = document.getElementById("themeToggleBtn");
-      let effectiveTheme = mode;
-      if (mode === "device") effectiveTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-
-      body.setAttribute("data-theme", effectiveTheme);
+      body.setAttribute("data-theme", mode);
       if (mode === "dark") btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-      else if (mode === "light") btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-      else btn.innerHTML = '<i class="fa-solid fa-mobile-screen"></i>';
+      else btn.innerHTML = '<i class="fa-solid fa-sun"></i>';
     }
 
-    function cycleTheme() {
+    function toggleTheme() {
       if (currentThemeMode === "dark") applyTheme("light");
-      else if (currentThemeMode === "light") applyTheme("device");
       else applyTheme("dark");
     }
 
@@ -883,11 +933,11 @@
           if (req.retries < 2) {
             req.retries++;
             this.queue.unshift(req);
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 500));
           } else { req.reject(error); }
         } finally {
           this.isProcessing = false;
-          setTimeout(() => this.processQueue(), 50);
+          setTimeout(() => this.processQueue(), 30);
         }
       }
       async executeFetch(action, payload) {
@@ -946,7 +996,7 @@
       const container = document.getElementById("mainContainer");
       container.style.animation = 'none';
       container.offsetHeight; 
-      container.style.animation = 'mediumMorph 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+      container.style.animation = 'viewEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards';
 
       if (viewId !== 'adminSettingsView') {
         const lockEl = document.getElementById("adminSettingsLock");
@@ -965,7 +1015,7 @@
         if (pw) pw.value = "";
       }
 
-      ["loginView", "dashboardView", "scanView", "searchView", "cardShareView", "addView", "adminSettingsView", "scheduleSettingsView", "resultView"].forEach(id => {
+      ["loginView", "dashboardView", "scanView", "searchView", "cardShareView", "cardPreviewView", "addView", "adminSettingsView", "scheduleSettingsView", "resultView"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = (id === viewId) ? "block" : "none";
       });
@@ -1175,12 +1225,18 @@
       } catch (e) { hideLoader(); renderResult({ kind: "error", title: "Connection Error", message: e.toString() }); }
     }
 
+    // Attend by Name Search with Tech Loader
     async function executeSearch() {
       var name = document.getElementById("searchNameInput").value.trim();
       var resDiv = document.getElementById("searchResults");
       if (!name) { showToast("⚠️ Please enter a name", "error"); return; }
 
-      resDiv.innerHTML = "<div style='text-align:center; padding:12px;'><div class='tech-loader' style='margin:0 auto 10px;'></div>Searching...</div>";
+      resDiv.innerHTML = `
+        <div style='text-align:center; padding:15px;'>
+          <div class='tech-loader' style='margin:0 auto 10px;'></div>
+          <div style='color:var(--text-sub); font-size:13px; font-weight:600;'>${translations[currentLang].searching}</div>
+        </div>
+      `;
       try {
         const res = await apiCall("search", { name: name });
         resDiv.innerHTML = "";
@@ -1198,119 +1254,92 @@
       } catch (err) { resDiv.innerHTML = ""; showToast("❌ Error during search", "error"); }
     }
 
-    // Updated Card Search: name outside with share status, expandable single view with card preview and working Send a Copy share button
+    // Card Share Search with Tech Loader -> Clicking opens Individual Card Preview View
     async function executeCardSearch() {
       var name = document.getElementById("shareNameInput").value.trim();
       var resDiv = document.getElementById("shareResults");
       if (!name) { showToast("⚠️ Please enter a servant name", "error"); return; }
 
-      resDiv.innerHTML = "<div style='text-align:center; padding:12px;'><div class='tech-loader' style='margin:0 auto 10px;'></div>Searching...</div>";
+      resDiv.innerHTML = `
+        <div style='text-align:center; padding:15px;'>
+          <div class='tech-loader' style='margin:0 auto 10px;'></div>
+          <div style='color:var(--text-sub); font-size:13px; font-weight:600;'>${translations[currentLang].searching}</div>
+        </div>
+      `;
       try {
         const res = await apiCall("search_card_share", { name: name });
         resDiv.innerHTML = "";
         if (res && res.status === "success" && Array.isArray(res.matches)) {
           res.matches.forEach(item => {
             var cardBox = document.createElement("div");
-            cardBox.style.cssText = "background:var(--chip-bg); backdrop-filter:blur(10px); border:1.5px solid var(--card-border); padding:14px; border-radius:16px; margin-bottom:12px; text-align:center; cursor:pointer; transition: all 0.25s;";
+            cardBox.style.cssText = "background:var(--chip-bg); backdrop-filter:blur(15px); border:1.5px solid var(--card-border); padding:14px; border-radius:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition: all 0.2s;";
             
             let statusText = item.isNew ? translations[currentLang].notShared : translations[currentLang].alreadyShared;
             let statusColor = item.isNew ? "#f59e0b" : "#16a34a";
 
             cardBox.innerHTML = `
-              <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-weight:bold; font-size:15px; color:var(--accent-gold);">👤 ${item.name}</div>
-                <div style="font-size:12px; font-weight:600; color:${statusColor};">${statusText}</div>
-              </div>
+              <div style="font-weight:bold; font-size:15px; color:var(--accent-gold);">👤 ${item.name}</div>
+              <div style="font-size:12px; font-weight:600; color:${statusColor};">${statusText}</div>
             `;
             
-            var detailsContainer = document.createElement("div");
-            detailsContainer.style.display = "none";
-            detailsContainer.style.marginTop = "12px";
-            detailsContainer.style.paddingTop = "12px";
-            detailsContainer.style.borderTop = "1px dashed var(--card-border)";
-
-            let fetchUrl = item.driveUrl;
-            if (fetchUrl.includes("drive.google.com")) {
-              let matchId = fetchUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-              if (matchId && matchId[1]) fetchUrl = "https://lh3.googleusercontent.com/d/" + matchId[1];
-            }
-
-            detailsContainer.innerHTML = `
-              <div style="margin-bottom:12px;">
-                <img src="${fetchUrl}" alt="Card Preview" style="width:100%; max-height:240px; object-fit:contain; border-radius:12px; border:1px solid var(--card-border); background:#000;">
-              </div>
-            `;
-
-            var shareBtn = document.createElement("button");
-            shareBtn.className = "btn";
-            shareBtn.innerHTML = `<i class="fa-solid fa-share-nodes"></i> ${translations[currentLang].sendCopyBtn}`;
-            shareBtn.onclick = (e) => {
-              e.stopPropagation();
-              shareCardImage(item.fileId, item.driveUrl, item.name);
-            };
-
-            detailsContainer.appendChild(shareBtn);
-            cardBox.appendChild(detailsContainer);
-
             cardBox.onclick = () => {
-              detailsContainer.style.display = detailsContainer.style.display === "none" ? "block" : "none";
+              openCardPreview(item.fileId, item.driveUrl, item.name);
             };
 
             resDiv.appendChild(cardBox);
           });
-        } else { showToast("❌ No cards found for this name", "error"); }
+        } else { resDiv.innerHTML = `<div style="text-align:center; color:var(--text-sub); font-size:13px; padding:10px;">❌ No cards found</div>`; }
       } catch(e) { resDiv.innerHTML = ""; showToast("❌ Search error", "error"); }
     }
 
-    async function shareCardImage(fileId, driveUrl, studentName) {
+    function openCardPreview(fileId, driveUrl, studentName) {
+      activePreviewCard = { fileId: fileId, driveUrl: driveUrl, name: studentName };
+      document.getElementById("previewStudentName").innerText = studentName;
+      
+      let fetchUrl = driveUrl;
+      if (driveUrl.includes("drive.google.com")) {
+        let matchId = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (matchId && matchId[1]) fetchUrl = "https://lh3.googleusercontent.com/d/" + matchId[1];
+      }
+      
+      document.getElementById("previewCardImg").src = fetchUrl;
+      showView('cardPreviewView');
+    }
+
+    async function shareCurrentCardImage() {
       showLoader("Preparing image for sharing...");
       try {
-        let fetchUrl = driveUrl;
-        if (driveUrl.includes("drive.google.com")) {
-          let matchId = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        let fetchUrl = activePreviewCard.driveUrl;
+        if (fetchUrl.includes("drive.google.com")) {
+          let matchId = fetchUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
           if (matchId && matchId[1]) fetchUrl = "https://lh3.googleusercontent.com/d/" + matchId[1];
         }
 
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        
-        const blobPromise = new Promise((resolve, reject) => {
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth || 400;
-            canvas.height = img.naturalHeight || 600;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob((blob) => {
-              if (blob) resolve(blob);
-              else reject(new Error("Canvas blob generation failed"));
-            }, "image/png");
-          };
-          img.onerror = (err) => reject(err);
-          img.src = fetchUrl;
-        });
-
-        const blob = await blobPromise;
-        const file = new File([blob], studentName + "_card.png", { type: "image/png" });
+        const response = await fetch(fetchUrl, { mode: 'cors' });
+        const blob = await response.blob();
+        const file = new File([blob], activePreviewCard.name + "_card.png", { type: "image/png" });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ title: "QR Card: " + studentName, text: "Church attendance card for " + studentName, files: [file] });
+          await navigator.share({ title: "QR Card: " + activePreviewCard.name, text: "Church attendance card for " + activePreviewCard.name, files: [file] });
         } else {
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
-          a.download = studentName + "_card.png";
+          a.download = activePreviewCard.name + "_card.png";
           a.click();
           showToast("💾 Image downloaded successfully", "success");
         }
 
-        if (fileId) await apiCall("share_move_card", { fileId: fileId });
+        if (activePreviewCard.fileId) await apiCall("share_move_card", { fileId: activePreviewCard.fileId });
         hideLoader();
-        showToast("✅ Operation completed successfully", "success");
-        executeCardSearch();
+        showToast("✅ Shared successfully", "success");
       } catch (e) {
         hideLoader();
-        window.open(driveUrl, '_blank');
+        window.open(activePreviewCard.driveUrl, '_blank');
       }
+    }
+
+    function openCurrentCardDrive() {
+      window.open(activePreviewCard.driveUrl, '_blank');
     }
 
     async function submitNewStudent() {
@@ -1494,4 +1523,4 @@
     }
   </script>
 </body>
-</html>
+  </html>
