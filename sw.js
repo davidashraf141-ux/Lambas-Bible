@@ -5,8 +5,9 @@ const ASSETS_TO_CACHE = [
   "./css/styles.css",
   "./js/app.js",
   "./manifest.json",
-  "./PWA-ICON-192.png",
-  "./PWA-ICON-512.png"
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512 (2).png"
 ];
 
 // Install Event - Pre-cache core app shell assets
