@@ -487,6 +487,15 @@
   </style>
 </head>
 <body data-theme="dark">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then((reg) => console.log('Service Worker registered:', reg.scope))
+        .catch((err) => console.error('Service Worker registration failed:', err));
+    });
+  }
+  </script>
 
   <div id="toastContainer" class="toast-container"></div>
   <div id="offlineOverlay" data-i18n="offlineMsg">⚠️ لا توجد اتصال بالإنترنت، يرجى التحقق من الشبكة</div>
@@ -1483,15 +1492,6 @@
         else { showToast(res.message || "Failed", "error"); }
       } catch(e) { hideLoader(); showToast("Error", "error"); }
     }
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then((reg) => console.log('Service Worker registered:', reg.scope))
-      .catch((err) => console.error('Service Worker registration failed:', err));
-  });
-}
   </script>
 </body>
 </html>
