@@ -1,17 +1,16 @@
 {
-  "name": "Lambas Bible Qr",
+  "name": "Lambas Bible",
   "short_name": "Lambas Bible",
   "icons": [
     {
-      "src": "new-icon-192.png",
+      "src": "PWA-ICON-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "new-icon-512.png",
+      "src": "PWA-ICON-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
     }
   ],
   "start_url": "./index.html",
